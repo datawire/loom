@@ -38,7 +38,7 @@ resource "aws_internet_gateway" "main" {
 
 resource "aws_subnet" "internal" {
   vpc_id            = "${aws_vpc.main.id}"
-  cidr_block        = "${cidrsubnet(var.cidr_block, 4, count.index)}"
+  cidr_block        = "${cidrsubnet(var.cidr_block, 4, length(data.aws_availability_zones.available.names) + 3 + count.index)}"
   availability_zone = "${element(sort(data.aws_availability_zones.available.names), count.index)}"
   count             = "${length(slice(data.aws_availability_zones.available.names, 0, 3))}"
 
@@ -49,7 +49,7 @@ resource "aws_subnet" "internal" {
 
 resource "aws_subnet" "external" {
   vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "${cidrsubnet(var.cidr_block, 4, (count.index + length(aws_subnet.internal.*.id) + 1))}"
+  cidr_block              = "${cidrsubnet(var.cidr_block, 4, length(data.aws_availability_zones.available.names) + 3 + length(aws_subnet.internal.*.id) + count.index)}"
   availability_zone       = "${element(sort(data.aws_availability_zones.available.names), count.index)}"
   count                   = "${length(slice(data.aws_availability_zones.available.names, 0, 3))}"
   map_public_ip_on_launch = true
