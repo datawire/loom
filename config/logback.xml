@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{"yyyy-MM-dd HH:mm:ss.SSS", UTC} %level [%thread] %logger{5} - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="STDOUT" />
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_STDOUT" />
+    </root>
+
+    <logger name="io.datawire" level="DEBUG" />
+    <logger name="io.netty" level="WARN" />
+    <logger name="com.hazelcast.cluster" level="INFO" />
+    <logger name="com.hazelcast.system" level="WARN" />
+    <logger name="com.hazelcast" level="WARN" />
+    <logger name="com.amazonaws" level="ERROR"/>
+    <logger name="org.apache.http" level="INFO" />
+
+</configuration>

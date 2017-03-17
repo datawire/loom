@@ -1,0 +1,117 @@
+import groovy.json.JsonSlurper
+
+buildscript {
+  ext.kotlinVersion = '1.1.0'
+  ext.shadowPluginVersion = '1.2.3'
+
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath "com.github.jengelman.gradle.plugins:shadow:${shadowPluginVersion}"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+  }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+if (!JavaVersion.current().java8Compatible) {
+  throw new IllegalArgumentException('''A Haiku:
+                                      |  This needs Java 8,
+                                      |  You are using something else,
+                                      |  Upgrade. Try again.'''.stripMargin())
+}
+
+group   = 'io.datawire.loom'
+version = new BuildInfo().resolveVersion()
+
+ext {
+  awsSdkVersion      = '1.11.105'
+  jacksonVersion     = '2.9.0.pr1'
+  junitVersion       = '4.12'
+  logbackVersion     = '1.1.7'
+  vertxVersion       = '3.4.0'
+}
+
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  jcenter()
+  mavenLocal()
+}
+
+dependencies {
+  compile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+
+  compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.24'
+
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-core',     version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-s3',       version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
+
+  compile group: 'javax.el',          name: 'javax.el-api', version: '2.2.4'
+  compile group: 'org.glassfish.web', name: 'el-impl',      version: '2.2'
+
+  compile group: 'com.fasterxml.jackson.core',       name: 'jackson-annotations',            version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.module',     name: 'jackson-module-kotlin',          version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.module',     name: 'jackson-module-parameter-names', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml',        version: jacksonVersion
+
+  compile group: 'io.fabric8', name: 'kubernetes-client', version: '2.1.2'
+
+  compile (group: 'io.vertx', name: 'vertx-core',        version: vertxVersion) { exclude module: 'com.fasterxml.jackson' }
+  compile  group: 'io.vertx', name: 'vertx-web',         version: vertxVersion
+  compile  group: 'io.vertx', name: 'vertx-lang-kotlin', version: vertxVersion
+
+  compile group: 'org.apache.commons',   name: 'commons-lang3', version: '3.5'
+
+  compile group: 'org.hibernate', name: 'hibernate-validator', version: '5.4.0.Final'
+
+  compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlinVersion
+  compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+
+  compile group: 'org.zeroturnaround', name: 'zt-exec', version: '1.9'
+
+  testCompile group: 'io.vertx',    name: 'vertx-unit',   version: vertxVersion
+  testCompile group: 'org.assertj', name: 'assertj-core', version: '3.6.2'
+  testCompile group: 'junit',       name: 'junit',        version: junitVersion
+}
+
+tasks.withType(Tar) {
+  compression = Compression.GZIP
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '3.4'
+}
+
+kotlin {
+  experimental {
+    coroutines 'enable'
+  }
+}
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = '1.8'
+  }
+}
+
+shadowJar {
+  classifier = 'fat'
+
+  manifest {
+    attributes 'Main-Class'    : 'io.datawire.loom.Runner'
+    attributes 'Main-Verticle' : 'io.datawire.loom.LoomVerticle'
+  }
+
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
+}

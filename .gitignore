@@ -1,0 +1,37 @@
+# --- Loom ---
+.loom
+workspace
+
+# --- Java ---
+build
+target
+
+# --- Eclipse ---
+.project
+
+# --- IntelliJ ---
+.idea
+*.iml
+
+# --- OS Junk ---
+.directory
+.DS_Store
+
+# --- Gradle ---
+.gradle
+
+# --- Vert.x ---
+.vertx
+
+# --- Python ---
+*.pyc
+
+# --- Secrets ---
+*.key
+*.pem
+*.p12
+*.pkcs12
+*.jks
+*.jceks
+*.password
+*.passwd

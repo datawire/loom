@@ -1,0 +1,17 @@
+{
+  "name": "default",
+  "version": 1,
+
+  "networking": {
+    "module": "github.com/datawire/loom/src/terraform//network"
+  },
+
+  "masterType": "t2.nano",
+  "nodeGroups": [
+    {
+      "name": "primary",
+      "nodeCount": 1,
+      "nodeType": "t2.nano"
+    }
+  ]
+}

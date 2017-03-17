@@ -1,0 +1,13 @@
+{
+  "api": {
+    "port": 5000
+  },
+
+  "kops": {
+    "executable": "/home/plombardi/bin/kops"
+  },
+
+  "terraform": {
+    "executable": "/home/plombardi/bin/terraform"
+  }
+}

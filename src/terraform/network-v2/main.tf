@@ -122,3 +122,4 @@ resource "aws_route_table_association" "external" {
 output "id"                 { value = "${aws_vpc.main.id}" }
 output "cidr_block"         { value = "${aws_vpc.main.cidr_block}" }
 output "external_subets"    { value = "${aws_subnet.external.*}" }
+output "availability_zones" { value = ["${slice(data.aws_availability_zones.available.names, 0, 3)}"] }
