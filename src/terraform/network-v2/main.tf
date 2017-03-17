@@ -49,7 +49,7 @@ resource "aws_subnet" "internal" {
 
 resource "aws_subnet" "external" {
   vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "${cidrsubnet(var.cidr_block, 4, (count.index + aws_subnet.internal.count + 1))}"
+  cidr_block              = "${cidrsubnet(var.cidr_block, 4, (count.index + length(aws_subnet.internal.*.id) + 1))}"
   availability_zone       = "${element(sort(data.aws_availability_zones.available.names), count.index)}"
   count                   = "${length(slice(data.aws_availability_zones.available.names, 0, 3))}"
   map_public_ip_on_launch = true
@@ -57,6 +57,8 @@ resource "aws_subnet" "external" {
   tags {
     Name = "${var.name}-${format("external-%03d", count.index + 1)}"
   }
+
+  depends_on = ["aws_subnet.internal"]
 }
 
 resource "aws_route_table" "external" {
