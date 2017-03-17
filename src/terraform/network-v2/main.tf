@@ -4,7 +4,6 @@
 // Variables
 // ---------------------------------------------------------------------------------------------------------------------
 
-
 variable "cidr_block" {
   description = "CIDR block for the VPC"
 }
@@ -41,7 +40,7 @@ resource "aws_subnet" "internal" {
   vpc_id            = "${aws_vpc.main.id}"
   cidr_block        = "${cidrsubnet(var.cidr_block, 4, count.index)}"
   availability_zone = "${element(sort(data.aws_availability_zones.available.names), count.index)}"
-  count             = "${length(data.aws_availability_zones.available.names)}"
+  count             = "${length(slice(data.aws_availability_zones.available.names, 0, 3))}"
 
   tags {
     Name = "${var.name}-${format("internal-%03d", count.index + 1)}"
@@ -49,10 +48,10 @@ resource "aws_subnet" "internal" {
 }
 
 resource "aws_subnet" "external" {
-  vpc_id            = "${aws_vpc.main.id}"
-  cidr_block        = "${cidrsubnet(var.cidr_block, 4, count.index)}"
-  availability_zone = "${element(sort(data.aws_availability_zones.available.names), count.index)}"
-  count             = "${length(data.aws_availability_zones.available.names)}"
+  vpc_id                  = "${aws_vpc.main.id}"
+  cidr_block              = "${cidrsubnet(var.cidr_block, 4, (count.index + aws_subnet.internal.count + 1))}"
+  availability_zone       = "${element(sort(data.aws_availability_zones.available.names), count.index)}"
+  count                   = "${length(slice(data.aws_availability_zones.available.names, 0, 3))}"
   map_public_ip_on_launch = true
 
   tags {
