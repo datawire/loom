@@ -100,6 +100,10 @@ tasks.withType(Tar) {
   compression = Compression.GZIP
 }
 
+task version() {
+  println(version)
+}
+
 task wrapper(type: Wrapper) {
   gradleVersion = '3.4'
 }
