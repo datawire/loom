@@ -16,6 +16,22 @@ class Kops(private val config: KopsConfig) {
     val kops get() = config.executable.toString()
     val version by lazy { readVersion() }
 
+    fun rawClusterInfo(clusterName: String): JsonObject {
+        logger.debug("Querying for cluster info (name: {})", clusterName)
+        val res = kops("get", "clusters",
+                "--full",
+                "--name=$clusterName",
+                "--state=s3://datawire-loom",
+                "--output=json"
+        )
+
+        if (res.exitValue == 0) {
+            return JsonObject(res.outputUTF8())
+        } else {
+            throw IllegalStateException("Unable to create cluster info!\n\n${res.outputUTF8()}")
+        }
+    }
+
     fun createCluster(create: KopsCreateCluster): JsonObject {
         logger.debug("Creating Cluster {}", create)
 

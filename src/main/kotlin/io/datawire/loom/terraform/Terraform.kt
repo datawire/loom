@@ -13,11 +13,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 
-class Terraform(private val vertx: Vertx, private val config: ExternalProgramConfig, private val workspace: Path) {
+class Terraform(private val config: ExternalProgramConfig, private val workspace: Path) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    private val defaultOptions = setOf("-no-color", "-input=false")
 
     val terraform get() = config.executable.toString()
     val version: String by lazy { terraform("version").outputUTF8().lines()[0].replace("Terraform v", "") }

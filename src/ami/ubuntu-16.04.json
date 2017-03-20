@@ -1,0 +1,64 @@
+{
+  "variables": {
+    "build_number"     : null,
+    "builder"          : null,
+    "commit"           : null,
+    "force_deregister" : "false",
+    "source_ami"       : "ami-45b69e52",
+    "source_os"        : "ubuntu-16.04"
+  },
+
+  "builders": [
+    {
+      "type"             : "amazon-ebs",
+      "ami_description"  : "Datawire Loom (build: {{ user `build_number` }})",
+      "ami_name"         : "datawire-loom-x86_64-hvm-b{{ user `build_number` }}",
+      "instance_type"    : "t2.small",
+      "force_deregister" : "{{ user `force_deregister` }}",
+      "region"           : "us-east-1",
+      "source_ami"       : "{{ user `source_ami` }}",
+      "ssh_username"     : "ubuntu",
+
+      "launch_block_device_mappings": [
+        {
+          "device_name"           : "/dev/xvda",
+          "volume_size"           : 10,
+          "volume_type"           : "gp2",
+          "delete_on_termination" : true
+        }
+      ],
+
+      "run_tags": {
+        "Build"   : "{{ user `build_number` }}",
+        "Builder" : "{{ user `builder` }}",
+        "Commit"  : "{{ user `commit` }}",
+        "Name"    : "packer-loom-b{{ user `build_number` }}",
+        "Role"    : "packer"
+      },
+
+      "tags": {
+        "Build"      : "{{ user `build_number` }}",
+        "Builder"    : "{{ user `builder` }}",
+        "Branch"     : "",
+        "Commit"     : "{{ user `commit` }}",
+        "Role"       : "Datawire Loom",
+        "VendorURL"  : "https://datawire.io",
+        "GitHubURL"  : "https://github.com/datawire/loom"
+      }
+
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type"        : "file",
+      "source"      : "{{ user `source_os` }}/",
+      "destination" : "/tmp"
+    },
+    {
+      "type"            : "shell",
+      "script"          : "{{ template_dir }}/{{ user `source_os` }}.sh",
+      "execute_command" : "{{ .Vars }} sudo -E -S bash '{{ .Path }}'"
+    }
+  ]
+}

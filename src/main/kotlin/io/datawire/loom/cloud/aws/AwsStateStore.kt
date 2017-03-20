@@ -1,7 +1,6 @@
 package io.datawire.loom.cloud.aws
 
 import com.amazonaws.services.dynamodbv2.model.*
-import com.amazonaws.services.dynamodbv2.util.TableUtils
 import com.amazonaws.services.s3.model.*
 import io.datawire.loom.cloud.AwsProviderProfile
 import io.vertx.core.logging.LoggerFactory
@@ -21,7 +20,7 @@ data class AwsStateStore(val bucket: String, val region: String = "us-east-1") {
             s3.setBucketVersioningConfiguration(versionSupport)
             logger.info("Loom state store created!")
         } else {
-            logger.info("Loom state storage 's3://{}' in '{}' exists. It will NOT be created.", bucket, region)
+            logger.info("Loom state storage 's3://{}' in '{}' exists. It was NOT recreated or modified.", bucket, region)
         }
 
         val createTable = CreateTableRequest()
@@ -30,9 +29,12 @@ data class AwsStateStore(val bucket: String, val region: String = "us-east-1") {
                 .withAttributeDefinitions(AttributeDefinition().withAttributeName("LockID").withAttributeType("S"))
                 .withProvisionedThroughput(ProvisionedThroughput(1,1))
 
-        TableUtils.createTableIfNotExists( provider.dynamodb, createTable)
-        TableUtils.waitUntilExists( provider.dynamodb, createTable.tableName)
-        logger.info("Loom Terraform DynamoDB lock table '{}' created!", createTable.tableName)
+        val dynamo = provider.dynamodb
+        try {
+            dynamo.createTable(createTable)
+        } catch (ex: ResourceInUseException) {
+            logger.info("Loom Terraform lock table '{}' exists. It was NOT recreated or modified", createTable.tableName)
+        }
     }
 }
 
@@ -40,4 +42,3 @@ fun main(args: Array<String>) {
     val stateStore = AwsStateStore("datawire-loom")
     stateStore.initialize(AwsProviderProfile("foo", "us-east-1"))
 }
-
