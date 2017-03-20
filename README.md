@@ -1,5 +1,7 @@
 # Loom
 
+[![Join the chat at https://gitter.im/datawire/loom](https://badges.gitter.im/datawire/loom.svg)](https://gitter.im/datawire/loom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Loom is fabric creation and management tool for Kubernetes on AWS (initially). A Loom install is a simple server that runs inside of an EC2 instance or ECS container. A running loom server exposes a simple HTTP API that be easily scripted against for provisioning Kubernetes-centric fabrics.
 
 ## Rationale
