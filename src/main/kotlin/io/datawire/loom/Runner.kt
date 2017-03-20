@@ -2,6 +2,9 @@ package io.datawire.loom
 
 import io.vertx.core.Launcher
 import java.io.FileInputStream
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 private val MAIN_CLASS = Loom::class.qualifiedName!!
@@ -15,6 +18,10 @@ object Runner {
 
 fun main(arguments: Array<String>) {
     configureProperties()
+
+    val loomExternalToolsPath = Paths.get(System.getProperty("loom.external-tools.path", "./.loom/bin"))
+    Files.createDirectories(loomExternalToolsPath)
+
     Runner.run(configureArguments(arguments))
 }
 

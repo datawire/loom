@@ -14,7 +14,13 @@ buildscript {
   }
 }
 
+plugins {
+  id 'de.undercouch.download' version '3.2.0'
+}
+
 apply plugin: 'com.github.johnrengelman.shadow'
+
+import de.undercouch.gradle.tasks.download.Download
 
 if (!JavaVersion.current().java8Compatible) {
   throw new IllegalArgumentException('''A Haiku:
@@ -26,12 +32,19 @@ if (!JavaVersion.current().java8Compatible) {
 group   = 'io.datawire.loom'
 version = new BuildInfo().resolveVersion()
 
+new File(".loom/tmp").mkdirs()
+new File(".loom/bin").mkdirs()
+
 ext {
   awsSdkVersion      = '1.11.105'
   jacksonVersion     = '2.9.0.pr1'
   junitVersion       = '4.12'
   logbackVersion     = '1.1.7'
   vertxVersion       = '3.4.0'
+  terraformVersion   = '0.9.1'
+  terraformArch      = 'linux_amd64'
+  kopsVersion        = '1.5.3'
+  kopsArch           = 'linux-amd64'
 }
 
 apply plugin: 'kotlin'
@@ -114,4 +127,29 @@ shadowJar {
   mergeServiceFiles {
     include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
   }
+}
+
+task mkexecutable(type: Exec) {
+  commandLine 'chmod', '+x', '.loom/bin'
+}
+
+task downloadKops(type: Download) {
+  src "https://github.com/kubernetes/kops/releases/download/${kopsVersion}/kops-${kopsArch}"
+  onlyIfNewer true
+  dest new File(".loom/bin", "kops")
+
+  doLast {
+    project.exec { commandLine('chmod', '+x', '.loom/bin/kops') }
+  }
+}
+
+task downloadTerraform(type: Download) {
+  src "https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_${terraformArch}.zip"
+  onlyIfNewer true
+  dest new File(".loom/tmp", "terraform_${terraformVersion}_${terraformArch}.zip")
+}
+
+task downloadAndUnzipTerraform(dependsOn: downloadTerraform, type: Copy) {
+  from zipTree(downloadTerraform.dest)
+  into new File(".loom/bin")
 }
