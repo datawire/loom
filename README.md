@@ -1,26 +1,71 @@
 # Loom
 
-Loom is fabric creation and management tool for Kubernetes on AWS (initially). A Loom install is a simple server that runs inside of an EC2 instance or ECS container. A running loom server exposes a simple HTTP API that be easily scripted against for provisioning Kubernetes-centric fabrics.
+Loom is used to setup self-serve Kubernetes fabrics on Amazon Web Services with an experience that is similar to Google Container Engine for Google Cloud Platform. Developers love Kubernetes, but it's a pain to get up and running on AWS and Operations engineers have better things to be doing than babysitting developers as they get up and running with Kubernetes.
 
-## Rationale
+Thus we have Loom! Operators install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes clusters.
 
-Amazon Web Services ("AWS") lacks a 1st-party Kubernetes equivalent to Google Cloud Platform's Container Engine and the 3rd party tools that exist for provisioning Kubernetes clusters on AWS such as Kubernetes Ops (`kops`) and (`kube-aws`) are heavily geared towards operations users. Under the hood Loom is really just orchestrating these tools and others in a user-friendly fashion.
+## Getting Started in Five Minutes
 
-Along with managing the underlying Kubernetes cluster's creation Loom will also ensure that the fabric as a whole is setup properly which means manging specialized subnets for backing resources such as AWS RDS instances.
+This is a simple demonstration about Loom. For more detailed install instructions follow the [Detailed Install Guide](install/README.md).
 
-The theory behind Loom is that an operations-savvy user:
+### 1. Run Loom
 
-1. Installs Loom and assigns a DNS name to Loom (e.g. loom.example.org)
-2. Tells developers and operations engineers alike to get, manage and delete Kubernetes-centric fabrics via the Loom API.
+Loom server is packaged as a Docker image. Start it locally:
 
-## Loom's Target Audience
+```
+$> docker run --rm -it -p 5000:5000 datawire/loom:0.1.0
 
-Loom is primarily focused at an operations engineer that:
+Loom has started! API => localhost:5000
+```
 
-- Wants to provide a Google Container Engine like provisioning experience for their developers, for example, so devs can run sandboxed Kubernetes environments for themselves or provision a Kubernetes cluster for automated tests.
-- Needs to manage multiple Kubernetes clusters.
+### 2. Define a Fabric Model
 
-## Loom API
+A fabric specification is a reuseable template and configuration for all clusters. As an ops engineer you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters during CI tests without handing over full control or exposing unnecessary complexity. Let's create our first spec which will be named `myfirstspec` and uses the domain name `mycompany.com`.
+
+```bash
+$> curl -X POST \
+        -H "Content-Type: application/vnd.FabricSpec-v1+json" \
+        -d '{"name": "myfirstspec", "domain": "mycompany.com"}' \
+        localhost:5000/fabric-models
+
+200 OK
+```
+
+Once a specification is registered many clusters can reuse it!
+
+### 3. Startup a Kubernetes Cluster
+
+Let's bootup a cluster!
+
+```bash
+$> curl -X POST \
+        -H "Content-Type: application/vnd.Fabric-v1+json" \
+        -d '{"name": "myfirstcluster", "spec": "myfirstspec"}' \
+        localhost:5000/fabrics
+
+200 OK!
+```
+
+### 4. Check for the cluster to come up
+
+```bash
+$> curl -H 'Accept: application/vnd.Fabric-v1+json' \
+        localhost:5000/fabrics/myfirstcluster
+
+{
+  "name"           : "myfirstcluster",
+  "creationTime"   : "2017-03-10'T'00:00:00",
+  "activationTime" : null,
+  "provider"       : "AWS",
+  "status"         : "CREATION_IN_PROGRESS",
+  "owner"          : "plombardi",
+}
+```
+
+When `CREATION_IN_PROGRESS` changes to `CREATED` then you can start using your Kubernetes cluster.
+
+
+## Loom API (OUT OF DATE)
 
 The Loom API is composed of a handful of endpointss (this is just a rough sketch... don't fall in love with the impl).
 
