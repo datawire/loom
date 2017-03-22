@@ -35,6 +35,17 @@ version = new BuildInfo().resolveVersion()
 new File(".loom/tmp").mkdirs()
 new File(".loom/bin").mkdirs()
 
+def osArch = System.getProperty("os.name").toLowerCase()
+if (osArch.contains("linux")) {
+  osArch = "linux"
+} else if (osArch.contains("mac")) {
+  osArch = "darwin"
+} else if (osArch.contains("windows")) {
+  osArch = "windows"
+} else {
+  throw new IllegalArgumentException("Invalid OS architecture: ${osArch}")
+}
+
 ext {
   awsSdkVersion      = '1.11.105'
   jacksonVersion     = '2.9.0.pr1'
@@ -42,9 +53,9 @@ ext {
   logbackVersion     = '1.1.7'
   vertxVersion       = '3.4.0'
   terraformVersion   = '0.9.1'
-  terraformArch      = 'linux_amd64'
+  terraformArch      = "${osArch}_amd64"
   kopsVersion        = '1.5.3'
-  kopsArch           = 'linux-amd64'
+  kopsArch           = "${osArch}-amd64"
 }
 
 apply plugin: 'kotlin'
