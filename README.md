@@ -20,13 +20,13 @@ Loom has started! API => localhost:5000
 
 ### 2. Define a Fabric Model
 
-A fabric specification is a reuseable template and configuration for all clusters. As an ops engineer you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters during CI tests without handing over full control or exposing unnecessary complexity. Let's create our first spec which will be named `myfirstspec` and uses the domain name `mycompany.com`.
+A fabric specification is a reusable template and configuration for all clusters. As an ops engineer you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters during CI tests without handing over full control or exposing unnecessary complexity. Let's create our first spec which will be named `myfirstspec` and uses the domain name `mycompany.com`.
 
 ```bash
 $> curl -X POST \
-        -H "Content-Type: application/vnd.FabricSpec-v1+json" \
-        -d '{"name": "myfirstspec", "domain": "mycompany.com"}' \
-        localhost:5000/fabric-models
+        -H "Content-Type: application/vnd.FabricModel-v1+json" \
+        -d '{"name": "MyFirstFabricModel", "domain": "k736.net"}' \
+        localhost:7000/fabric-models
 
 200 OK
 ```
@@ -161,6 +161,56 @@ HTTP 200 OK
 
 HTTP 403 Forbidden (not allowed to do delete this fabric ... e.g. "prod")
 ```
+
+### Get a Fabric Model
+
+<table>
+  <tbody>
+    <tr>
+      <th>HTTP Method</th>
+      <th>Path</th>
+      <th>Parameters</th>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>/fabric-models/:name</td>
+      <td>
+        <ul>
+          <li>:name - the name of the fabric</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Inspect information about an existing fabric model:
+
+**cURL Request**
+
+```
+$> curl /fabric-models/:name
+
+{
+  "name" : "MyFirstFabricModel",
+  "allowedRegions" : [ "us-east-1" ],
+  "version" : 1,
+  "creationTime" : null,
+  "domain" : "k736.net",
+  "networking" : {
+    "module" : "github.com/datawire/loom//src/terraform/network-v2"
+  },
+  "masterType" : "t2.nano",
+  "nodeGroups" : [ 
+    {
+      "name" : "main",
+      "nodeCount" : 1,
+      "nodeType" : "t2.nano"
+    } 
+  ],
+  "id" : "myfirstfabricmodel-v1"
+}
+```
+
 
 ## Installing Loom
 

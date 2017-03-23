@@ -1,0 +1,15 @@
+{
+  "name" : "default",
+  "version" : 1,
+  "creationTime" : null,
+  "domain": "k736.net",
+  "networking" : {
+    "module" : "github.com/datawire/loom//src/terraform//network-v2"
+  },
+  "masterType" : "t2.nano",
+  "nodeGroups" : [ {
+    "name" : "primary",
+    "nodeCount" : 1,
+    "nodeType" : "t2.nano"
+  } ]
+}

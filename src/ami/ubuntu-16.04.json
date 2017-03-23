@@ -1,10 +1,10 @@
 {
   "variables": {
     "build_number"     : null,
-    "builder"          : null,
+    "branch"           : null,
     "commit"           : null,
     "force_deregister" : "false",
-    "source_ami"       : "ami-45b69e52",
+    "source_ami"       : "ami-2757f631",
     "source_os"        : "ubuntu-16.04"
   },
 
@@ -29,21 +29,22 @@
       ],
 
       "run_tags": {
-        "Build"   : "{{ user `build_number` }}",
-        "Builder" : "{{ user `builder` }}",
-        "Commit"  : "{{ user `commit` }}",
-        "Name"    : "packer-loom-b{{ user `build_number` }}",
-        "Role"    : "packer"
+        "Build"     : "{{ user `build_number` }}",
+        "Branch"    : "{{ user `branch` }}",
+        "Commit"    : "{{ user `commit` }}",
+        "Name"      : "packer-loom-b{{ user `build_number` }}",
+        "Role"      : "Packer Build (Datawire Loom)",
+        "VendorUrl" : "https://datawire.io",
+        "GitHubUrl" : "https://github.com/datawire/loom"
       },
 
       "tags": {
-        "Build"      : "{{ user `build_number` }}",
-        "Builder"    : "{{ user `builder` }}",
-        "Branch"     : "",
-        "Commit"     : "{{ user `commit` }}",
-        "Role"       : "Datawire Loom",
-        "VendorURL"  : "https://datawire.io",
-        "GitHubURL"  : "https://github.com/datawire/loom"
+        "Build"     : "{{ user `build_number` }}",
+        "Branch"    : "{{ user `branch` }}",
+        "Commit"    : "{{ user `commit` }}",
+        "Role"      : "Datawire Loom",
+        "VendorUrl" : "https://datawire.io",
+        "GitHubUrl" : "https://github.com/datawire/loom"
       }
 
     }

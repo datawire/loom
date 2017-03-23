@@ -20,6 +20,7 @@
     </root>
 
     <logger name="io.datawire" level="DEBUG" />
+    <logger name="org.hibernate.validator.internal.util" level="ERROR" />
     <logger name="io.netty" level="WARN" />
     <logger name="com.hazelcast.cluster" level="INFO" />
     <logger name="com.hazelcast.system" level="WARN" />
