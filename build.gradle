@@ -51,7 +51,7 @@ ext {
   jacksonVersion     = '2.9.0.pr1'
   junitVersion       = '4.12'
   logbackVersion     = '1.1.7'
-  vertxVersion       = '3.4.0'
+  vertxVersion       = '3.4.1'
   terraformVersion   = '0.9.1'
   terraformArch      = "${osArch}_amd64"
   kopsVersion        = '1.5.3'
@@ -76,6 +76,8 @@ dependencies {
   compile group: 'com.amazonaws', name: 'aws-java-sdk-core',     version: awsSdkVersion
   compile group: 'com.amazonaws', name: 'aws-java-sdk-s3',       version: awsSdkVersion
   compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-iam', version: awsSdkVersion
+
 
   compile group: 'javax.el',          name: 'javax.el-api', version: '2.2.4'
   compile group: 'org.glassfish.web', name: 'el-impl',      version: '2.2'
@@ -92,6 +94,7 @@ dependencies {
   compile (group: 'io.vertx', name: 'vertx-core',        version: vertxVersion) { exclude module: 'com.fasterxml.jackson' }
   compile  group: 'io.vertx', name: 'vertx-web',         version: vertxVersion
   compile  group: 'io.vertx', name: 'vertx-lang-kotlin', version: vertxVersion
+  compile  group: 'io.vertx', name: 'vertx-auth-common', version: vertxVersion
 
   compile group: 'org.apache.commons',   name: 'commons-lang3', version: '3.5'
 
