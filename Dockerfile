@@ -30,7 +30,7 @@ RUN curl --output terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
         https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && echo "${TERRAFORM_SHA256}  terraform_${TERRAFORM_VERSION}_linux_amd64.zip" > terraform_${TERRAFORM_VERSION}_SHA256 \
     && sha256sum -c terraform_${TERRAFORM_VERSION}_SHA256 \
-    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d bin/ \
+    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin \
     && rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && curl --output /bin/kops \
         "https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64" \
@@ -40,5 +40,7 @@ RUN curl --output terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
 COPY build/libs/loom-${IMPL_VERSION}-fat.jar \
      src/main/shell/entrypoint-docker.sh \
      ./
+
+COPY config/ config/
 
 ENTRYPOINT ["./entrypoint-docker.sh"]

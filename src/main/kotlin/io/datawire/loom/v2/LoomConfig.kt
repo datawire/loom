@@ -8,12 +8,13 @@ import io.datawire.loom.v1.terraform.TerraformConfig
 import io.datawire.loom.v2.aws.AwsConfig
 import io.datawire.loom.v2.auth.AuthProviderConfig
 import io.datawire.loom.v2.auth.NoAuthProvider
+import io.datawire.loom.v2.config.ExternalTool
 import io.datawire.vertx.Config
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class LoomConfig(val api            : ApiConfig = ApiConfig(host = "0.0.0.0", port = 7000),
+data class LoomConfig(val api            : ApiConfig          = ApiConfig(host = "0.0.0.0", port = 7000),
                       val authentication : AuthProviderConfig = NoAuthProvider(),
-                      val amazon         : AwsConfig = AwsConfig(null, null, null),
-                      val kops           : KopsConfig,
-                      val terraform      : TerraformConfig) : Config
+                      val amazon         : AwsConfig          = AwsConfig(null, null, null),
+                      val kops           : ExternalTool       = ExternalTool(executable = "kops"),
+                      val terraform      : ExternalTool       = ExternalTool(executable = "terraform")) : Config

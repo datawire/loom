@@ -1,7 +1,8 @@
 #!/bin/sh
 
 JAVA_EXECUTABLE=java
-JAVA_ARGS="-XX:+PrintFlagsFinal -XX:+PrintGCDetails ${JAVA_OPTIONS} -jar loom-${IMPL_VERSION}-fat.jar"
+#JAVA_ARGS="-XX:+PrintFlagsFinal -XX:+PrintGCDetails ${JAVA_OPTIONS} -jar loom-${IMPL_VERSION}-fat.jar"
+JAVA_ARGS="-jar loom-${IMPL_VERSION}-fat.jar"
 
 warn() {
   echo "$*"

@@ -90,78 +90,78 @@ class FabricManagerV2 : BaseVerticle<LoomConfig>(LoomConfig::class) {
     }
 
     private fun createCluster(msg: Message<FabricDeploymentContext>) {
-        var ctx = msg.body()
-        try {
-            ctx = ctx.copy(status = FabricStatus.KUBERNETES_CREATION_STARTED)
-            ctx.updateStatus(vertx)
-
-            val spec  = ctx.specification
-            val model = spec.model!!
-
-            val createCluster = KopsCreateCluster(spec.zones, spec.vpcId!!, spec.vpcCidr!!, "${spec.name}.${model.domain}")
-
-            val kops = Kops(this.config.kops.copy(stateStore = "s3://datawire-loom"))
-            kops.createCluster(createCluster)
-
-            ctx = ctx.copy(status = FabricStatus.NETWORKING_CREATION_COMPLETED)
-            ctx.updateStatus(vertx)
-        } catch (any: Throwable) {
-            ctx.copy(status = FabricStatus.FAILED).updateStatus(vertx)
-        }
+//        var ctx = msg.body()
+//        try {
+//            ctx = ctx.copy(status = FabricStatus.KUBERNETES_CREATION_STARTED)
+//            ctx.updateStatus(vertx)
+//
+//            val spec  = ctx.specification
+//            val model = spec.model!!
+//
+//            val createCluster = KopsCreateCluster(spec.zones, spec.vpcId!!, spec.vpcCidr!!, "${spec.name}.${model.domain}")
+//
+//            val kops = Kops(this.config.kops.copy(stateStore = "s3://datawire-loom"))
+//            kops.createCluster(createCluster)
+//
+//            ctx = ctx.copy(status = FabricStatus.NETWORKING_CREATION_COMPLETED)
+//            ctx.updateStatus(vertx)
+//        } catch (any: Throwable) {
+//            ctx.copy(status = FabricStatus.FAILED).updateStatus(vertx)
+//        }
     }
 
     private fun createNetworking(msg: Message<FabricDeploymentContext>) {
-        var ctx = msg.body()
-        try {
-            ctx = ctx.copy(status = FabricStatus.NETWORKING_CREATION_STARTED)
-            ctx.updateStatus(vertx)
-
-            val spec  = ctx.specification
-            val model = spec.model!!
-
-            val tf = Terraform(config.terraform, Paths.get(fabricRoot(spec.name)))
-            val tfConfig = TfConfig("s3", mapOf(
-                    "bucket"     to "datawire-loom",
-                    "key"        to "${spec.name}/terraform.tfstate",
-                    "encrypt"    to "true",
-                    "region"     to "us-east-1",
-                    "acl"        to "private",
-                    "lock_table" to "terraform_state"
-            ))
-
-            val provider = TfProvider("aws", mapOf("region" to "us-east-1"))
-            val networking = tf.generateNetworkingModule(model.networking.module, mapOf(
-                    "cidr_block"       to "10.0.0.0/16",
-                    "name"             to spec.name
-            ))
-
-            val tfTemplate = tf.generateTemplate(tfConfig, provider, listOf(networking))
-            putJson(spec.name, "main.tf.json", tfTemplate)
-
-            tf.init()
-
-            if (tf.plan()) {
-                tf.apply()
-            }
-
-            val tfOutput = tf.output()
-
-            val vpcId   = tfOutput.getJsonObject("main_vpc_id").getString("value")
-            val vpcCidr = tfOutput.getJsonObject("main_vpc_cidr").getString("value")
-            val vpcAz   = tfOutput.getJsonObject("main_vpc_availability_zones").getJsonArray("value").list?.map(Any?::toString)!!
-
-            val specWithNet = spec.copy(vpcId = vpcId, vpcCidr = vpcCidr, zones = vpcAz)
-
-            ctx = ctx.copy(
-                    specification = specWithNet,
-                    status = FabricStatus.NETWORKING_CREATION_COMPLETED)
-
-            ctx.updateStatus(vertx)
-
-            vertx.eventBus().send("fabric.create-cluster", ctx)
-        } catch (any: Throwable) {
-            ctx.copy(status = FabricStatus.FAILED).updateStatus(vertx)
-        }
+//        var ctx = msg.body()
+//        try {
+//            ctx = ctx.copy(status = FabricStatus.NETWORKING_CREATION_STARTED)
+//            ctx.updateStatus(vertx)
+//
+//            val spec  = ctx.specification
+//            val model = spec.model!!
+//
+//            val tf = Terraform(config.terraform, Paths.get(fabricRoot(spec.name)))
+//            val tfConfig = TfConfig("s3", mapOf(
+//                    "bucket"     to "datawire-loom",
+//                    "key"        to "${spec.name}/terraform.tfstate",
+//                    "encrypt"    to "true",
+//                    "region"     to "us-east-1",
+//                    "acl"        to "private",
+//                    "lock_table" to "terraform_state"
+//            ))
+//
+//            val provider = TfProvider("aws", mapOf("region" to "us-east-1"))
+//            val networking = tf.generateNetworkingModule(model.networking.module, mapOf(
+//                    "cidr_block"       to "10.0.0.0/16",
+//                    "name"             to spec.name
+//            ))
+//
+//            val tfTemplate = tf.generateTemplate(tfConfig, provider, listOf(networking))
+//            putJson(spec.name, "main.tf.json", tfTemplate)
+//
+//            tf.init()
+//
+//            if (tf.plan()) {
+//                tf.apply()
+//            }
+//
+//            val tfOutput = tf.output()
+//
+//            val vpcId   = tfOutput.getJsonObject("main_vpc_id").getString("value")
+//            val vpcCidr = tfOutput.getJsonObject("main_vpc_cidr").getString("value")
+//            val vpcAz   = tfOutput.getJsonObject("main_vpc_availability_zones").getJsonArray("value").list?.map(Any?::toString)!!
+//
+//            val specWithNet = spec.copy(vpcId = vpcId, vpcCidr = vpcCidr, zones = vpcAz)
+//
+//            ctx = ctx.copy(
+//                    specification = specWithNet,
+//                    status = FabricStatus.NETWORKING_CREATION_COMPLETED)
+//
+//            ctx.updateStatus(vertx)
+//
+//            vertx.eventBus().send("fabric.create-cluster", ctx)
+//        } catch (any: Throwable) {
+//            ctx.copy(status = FabricStatus.FAILED).updateStatus(vertx)
+//        }
     }
 
     fun createFabric(msg: Message<FabricSpec>) {

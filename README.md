@@ -1,22 +1,42 @@
 # Loom
 
-Loom is used to setup self-serve Kubernetes fabrics on Amazon Web Services with an experience that is similar to Google Container Engine for Google Cloud Platform. Developers love Kubernetes, but it's a pain to get up and running on AWS and Operations engineers have better things to be doing than babysitting developers as they get up and running with Kubernetes.
+Loom enables operations engineers to provide a self-serve Kubernetes provisioning experience for developers and much more! Developers love Kubernetes, but it's a pain to get up and running on AWS and ops engineers usually have better things to be doing than babysitting devs as they get up and running with Kubernetes.
 
-Thus we have Loom! Operators install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes clusters.
+Thus we have Loom! Operators install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes clusters. Loom handles all the nitty gritty details of network creation and cluster management.
 
 ## Getting Started in Five Minutes
 
-This is a simple demonstration about Loom. For more detailed install instructions follow the [Detailed Install Guide](install/README.md).
+This is a simple demonstration of Loom. For more detailed install instructions follow the [Detailed Install Guide](install/README.md).
+
+### Prerequisites
+
+- Access to a valid and active pair of AWS credentials.
+- [Docker](https://docker.io)
 
 ### 1. Run Loom
 
-Loom server is packaged as a Docker image. Start it locally:
+Loom is packaged as a Docker image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
+
+- An AWS S3 bucket where Loom can store app state and config. The name will be `loom-state-${AWS_ACCOUNT_ID}`.
+- An AWS DynamoDB table named `loom_terraform_state_lock` which is used internally when provisioning for state management safety against concurrent executions.
 
 ```
-$> docker run --rm -it -p 5000:5000 datawire/loom:0.1.0
+$> docker run --rm -it \
+    -p 7000:7000 \
+    -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
+    -e AWS_SECRET_ACCESS_KEY=<Your-AWS-API-Secret-Key> \
+    -e AWS_REGION=us-east-1 \
+    datawire/loom:0.1.0
 
-Loom has started! API => localhost:5000
+2017-03-23 19:39:29.144 INFO [vert.x-eventloop-thread-0] i.d.l.v.Loom - Loom starting...
+2017-03-23 19:39:30.007 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS bootstrap started
+2017-03-23 19:39:30.235 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS S3 bucket for Loom state store created: loom-state-914373874199
+2017-03-23 19:39:30.428 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS DynamoDB table for Loom terraform state locks created: loom_terraform_state_lock
+2017-03-23 19:39:30.428 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS bootstrap completed
+2017-03-23 19:39:30.610 INFO [vert.x-eventloop-thread-0] i.d.l.v.Loom - Loom started! Listening @ http://0.0.0.0:7000
 ```
+
+Once you see the Loom `Loom started! Listening @ http://0.0.0.0:7000` message you can start playing with Loom.
 
 ### 2. Define a Fabric Model
 

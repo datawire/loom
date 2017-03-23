@@ -81,27 +81,34 @@ class Loom : BaseVerticle<LoomConfig>(LoomConfig::class) {
             }
         }
 
-        router.get("/fabrics/:name").apply {
-            produces("application/json")
+        router.get("/fabrics/:name/cluster/config").apply {
+            produces("application/vnd.io.kubernetes.kubeconfig+yaml")
             blockingHandler { rc ->
-                val kops  = Kops(config.kops.copy(stateStore = provider.stateStorageBucket))
-                val fm    = FabricModelManager(S3Persistence(provider))
-                val model = fm.getFabricModel(rc.pathParam("name"))
-                val data = kops.rawClusterInfo("${rc.pathParam("name")}.${model.domain}")
-                rc.response().end(data.encodePrettily())
+
             }
         }
 
-        router.delete("/fabrics/:name/cluster").apply {
-            produces("application/json")
-            blockingHandler { rc ->
-                val kops  = Kops(config.kops.copy(stateStore = provider.stateStorageBucket))
-                val fm    = FabricModelManager(S3Persistence(provider))
-                val model = fm.getFabricModel(rc.pathParam("name"))
-                kops.deleteCluster(DeleteFabric(rc.pathParam("name"), "${rc.pathParam("name")}.${model.domain}"))
-                rc.response().end()
-            }
-        }
+//        router.get("/fabrics/:name").apply {
+//            produces("application/json")
+//            blockingHandler { rc ->
+//                val kops  = Kops(config.kops.copy(stateStore = provider.stateStorageBucket))
+//                val fm    = FabricModelManager(S3Persistence(provider))
+//                val model = fm.getFabricModel(rc.pathParam("name"))
+//                val data = kops.rawClusterInfo("${rc.pathParam("name")}.${model.domain}")
+//                rc.response().end(data.encodePrettily())
+//            }
+//        }
+//
+//        router.delete("/fabrics/:name/cluster").apply {
+//            produces("application/json")
+//            blockingHandler { rc ->
+//                val kops  = Kops(config.kops.copy(stateStore = provider.stateStorageBucket))
+//                val fm    = FabricModelManager(S3Persistence(provider))
+//                val model = fm.getFabricModel(rc.pathParam("name"))
+//                kops.deleteCluster(DeleteFabric(rc.pathParam("name"), "${rc.pathParam("name")}.${model.domain}"))
+//                rc.response().end()
+//            }
+//        }
 
         router.post("/fabric-models").apply {
             consumes("application/vnd.FabricModel-v1+json")

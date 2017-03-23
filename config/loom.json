@@ -2,13 +2,5 @@
   "api": {
     "host": "0.0.0.0",
     "port": 7000
-  },
-
-  "kops": {
-    "executable": "/home/plombardi/bin/kops"
-  },
-
-  "terraform": {
-    "executable": "/home/plombardi/bin/terraform"
   }
 }
