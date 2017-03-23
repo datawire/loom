@@ -4,8 +4,10 @@ import io.datawire.loom.v1.exception.LoomException
 import io.datawire.loom.v1.fabric.FabricSpec
 import io.datawire.loom.v1.kops.Kops
 import io.datawire.loom.v2.aws.AwsProvider
-import io.datawire.loom.v2.kops.KopsDeleteCluster
+import io.datawire.loom.v2.kops.KopsTool2
+import io.datawire.loom.v2.kops.KopsToolContext
 import io.datawire.loom.v2.model.DeleteFabric
+import io.datawire.loom.v2.model.FabricManager
 import io.datawire.loom.v2.model.FabricModel
 import io.datawire.loom.v2.model.FabricModelManager
 import io.datawire.loom.v2.persistence.S3Persistence
@@ -82,9 +84,12 @@ class Loom : BaseVerticle<LoomConfig>(LoomConfig::class) {
         }
 
         router.get("/fabrics/:name/cluster/config").apply {
-            produces("application/vnd.io.kubernetes.kubeconfig+yaml")
             blockingHandler { rc ->
-
+                val resp       = rc.response()
+                val fm     = FabricManager(S3Persistence(provider))
+                val fabric = fm.getFabric(rc.pathParam("name"))
+                val kops = KopsTool2(config.kops, KopsToolContext(provider.stateStorageBucket))
+                resp.putHeader(HttpHeaders.CONTENT_TYPE, "application/yaml").end(kops.exportKubernetesConfiguration(fabric.clusterName!!))
             }
         }
 

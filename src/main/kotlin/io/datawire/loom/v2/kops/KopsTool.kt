@@ -16,7 +16,7 @@ import java.nio.file.Paths
 import java.util.*
 
 
-class KopsTool(private val tool: ExternalTool, private val ctx: KopsContext): AutoCloseable, Closeable {
+class KopsTool(private val tool: ExternalTool, private val ctx: KopsToolContext): AutoCloseable, Closeable {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -121,7 +121,7 @@ fun main(args: Array<String>) {
         System.setProperty(name.toString(), value.toString())
     }
 
-    val kops = KopsTool(ExternalTool("kops"), KopsContext("loom-state-914373874199"))
+    val kops = KopsTool(ExternalTool("kops"), KopsToolContext("loom-state-914373874199"))
 
     kops.use {
         println(it.version())
