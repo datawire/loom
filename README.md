@@ -2,7 +2,11 @@
 
 Loom enables operations engineers to provide a self-serve Kubernetes provisioning experience for developers and much more! Developers love Kubernetes, but it's a pain to get up and running on AWS and ops engineers usually have better things to be doing than babysitting devs as they get up and running with Kubernetes.
 
-Thus we have Loom! Operators install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes clusters. Loom handles all the nitty gritty details of network creation and cluster management.
+Thus we have Loom! Operators install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes fabrics. Loom handles all the nitty gritty details of network creation and cluster management.
+
+## What is a Kubernetes "Fabric"?
+
+When people talk about Kubernetes they usually talk purely in terms of the Kubernetes cluster where containers are scheduled and run. A "fabric" is an abstract concept that describes the entire ecosystem surrounding a Kubernetes cluster, for example, a "Kubernetes" and "AWS" fabric includes not only the Kubernetes cluster, but one or more VPC and within that VPC you may schedule non-Kubernetes resources to run such as RDS databases or EC2 instances. The point of calling it a "fabric" is that it's all nicely woven together for you so that, for example, containers running in the Kubernetes cluster can speak to the RDS databases without having to think about networking.
 
 ## Getting Started in Five Minutes
 
@@ -10,7 +14,7 @@ This is a simple demonstration of Loom. For more detailed install instructions f
 
 ### Prerequisites
 
-- Access to a valid and active pair of AWS credentials.
+- Access to an active pair of AWS credentials.
 - [Docker](https://docker.io)
 
 ### 1. Run Loom
@@ -40,7 +44,9 @@ Once you see the Loom `Loom started! Listening @ http://0.0.0.0:7000` message yo
 
 ### 2. Define a Fabric Model
 
-A fabric specification is a reusable template and configuration for all clusters. As an ops engineer you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters during CI tests without handing over full control or exposing unnecessary complexity. Let's create our first spec which will be named `myfirstspec` and uses the domain name `mycompany.com`.
+Open a second terminal that can act as your client to interact with the running Loom server.
+
+Loom has a very important concept of a 'Fabric Model' which basically a reusable template and configuration that many fabrics deployed by loom can use to simplify configuration. The purpose of a "Fabric Model" is to keep the Operator in control of things like size of Kubernetes nodes or what SSH key pairs to assign to instances. Consider a scenario as an ops engineer where you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters for experimentation or CI tests without handing over full control or exposing unnecessary complexity. Let's create our first model which will be named `MyFirstFabricModel` and uses the domain name `mycompany.com`.
 
 ```bash
 $> curl -X POST \
@@ -84,6 +90,21 @@ $> curl -H 'Accept: application/vnd.Fabric-v1+json' \
 
 When `CREATION_IN_PROGRESS` changes to `CREATED` then you can start using your Kubernetes cluster.
 
+### 5. Use your cluster
+
+Once the status changes to `CREATED` you can start using the cluster! The first step to using your cluster is to get the [kubeconfig](https://kubernetes.io/docs/concepts/cluster-administration/authenticate-across-clusters-kubeconfig/) for the cluster:
+
+```bash
+$> mkdir   ~/.kube/config.d
+$> curl -O ~/.kube/config.d/myfirstcluster \
+        localhost:7000/fabrics/myfirstfabric/cluster/kubeconfig
+        
+$> kubectl cluster-info --kubeconfig={$HOME}/.kube/config.d/myfirstcluster
+Kubernetes master is running at https://api.myfirstcluster.example.org
+KubeDNS is running at https://api.myfirstcluster.example.org/api/v1/proxy/namespaces/kube-system/services/kube-dns
+```
+
+**NOTE:** The `kubectl` command does not *yet* understand the `config.d` idiom, but there is a Pull Request moving along to enable this functionality in `kubectl`. The idea is that `kubectl` would load all the config files in this directory before use. Until then we need to simulate usage with the `--kubeconfig=<path>` option.
 
 ## Loom API (OUT OF DATE)
 
