@@ -1,0 +1,12 @@
+package io.datawire.loom.model
+
+
+enum class FabricStatus {
+    NOT_STARTED,
+    PROVISION_NETWORK_STARTED,
+    PROVISION_NETWORK_COMPLETED,
+    PROVISION_CLUSTER_STARTED,
+    PROVISION_CLUSTER_COMPLETED,
+    COMPLETED,
+    FAILED
+}

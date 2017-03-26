@@ -19,7 +19,9 @@
         <appender-ref ref="ASYNC_STDOUT" />
     </root>
 
+    <logger name="spark" level="WARN" />
     <logger name="io.datawire" level="DEBUG" />
+    <logger name="org.eclipse" level="ERROR" />
     <logger name="org.hibernate.validator.internal.util" level="ERROR" />
     <logger name="io.netty" level="WARN" />
     <logger name="com.hazelcast.cluster" level="INFO" />
