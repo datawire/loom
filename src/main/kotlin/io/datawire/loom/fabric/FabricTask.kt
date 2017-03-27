@@ -9,8 +9,6 @@ import io.datawire.loom.fabric.terraform.TerraformTool
 import io.datawire.loom.model.FabricStatus
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
 
 sealed class FabricTask(var ctx: FabricTaskContext, val after: FabricTask? = null) {

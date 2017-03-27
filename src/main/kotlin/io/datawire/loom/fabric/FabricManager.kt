@@ -57,7 +57,7 @@ class FabricManager(private val terraform     : ExternalTool,
         val model = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
         validate(model, fabric)
 
-        fabrics.put(fabric.name, fabric)
+        fabrics.put(fabric.name, fabric.copy(clusterName = "${fabric.name}.${model.domain}"))
         val workspace = createWorkspace(fabric.name)
 
         createNetwork(workspace, model, fabric)
@@ -66,7 +66,7 @@ class FabricManager(private val terraform     : ExternalTool,
 
     private fun createNetwork(workspace: Path, model: FabricModel, fabric: Fabric) {
         val tfProvider = TfProvider("aws", mapOf("region" to model.region))
-        val tfConfig   = TfConfig("s3", mapOf(
+        val tfBackend  = TfBackend("s3", mapOf(
                 "bucket"     to awsProvider.stateStorageBucket,
                 "key"        to "fabrics/${fabric.name}.tfstate",
                 "encrypt"    to "true",
@@ -80,7 +80,7 @@ class FabricManager(private val terraform     : ExternalTool,
                 "name"             to fabric.name
         ))
 
-        val tfTemplate = generateTemplate(tfConfig, tfProvider, listOf(networking))
+        val tfTemplate = generateTemplate(tfBackend, tfProvider, listOf(networking))
         tfTemplate.write(workspace.resolve("terraform.tf.json"))
 
         val fabCtx = FabricTaskContext(model, fabric, this, workspace, terraform, kops)
@@ -101,10 +101,10 @@ class FabricManager(private val terraform     : ExternalTool,
     }
 
     private fun generateTemplate(
-            config: TfConfig, provider: TfProvider, modulesAndOutputs: List<Pair<TfModule, List<TfOutput>>>): TfTemplate {
+            config: TfBackend, provider: TfProvider, modulesAndOutputs: List<Pair<TfModule, List<TfOutput>>>): TfTemplate {
 
         val template = TfTemplate(
-                config    = listOf(mapOf(config.type to listOf(config))),
+                config    = listOf(mapOf("backend" to listOf(mapOf(config.type to config)))),
                 providers = mapOf(provider.name to provider))
 
         return modulesAndOutputs.fold(template) { template, (module, outputs) ->
@@ -113,16 +113,11 @@ class FabricManager(private val terraform     : ExternalTool,
                     outputs = template.outputs + outputs.associateBy { it.name }) }
     }
 
-    fun createCluster(fabric: Fabric) {
-
-    }
-
-    fun deleteNetwork(fabric: Fabric) {
-
-    }
-
     fun deleteCluster(fabric: Fabric) {
-
+        val model = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
+        val fabCtx = FabricTaskContext(model, fabric, this, createWorkspace(fabric.name), terraform, kops)
+        val task = DeleteCluster(fabCtx)
+        putTask(task)
     }
 
     private fun createWorkspace(fabricName: String): Path {

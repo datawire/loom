@@ -54,6 +54,7 @@ class KopsTool(private val tool: ExternalTool,
 
     private fun prepareExecutionContext(): ExternalToolExecutorContext {
         val variables = mutableMapOf<String, String>(
+                "PATH" to System.getenv("PATH"),
                 "HOME" to context.workspace.toAbsolutePath().toString(),
                 "KOPS_STATE_STORE" to "s3://${context.stateStorageBucket}"
         )

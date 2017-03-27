@@ -100,8 +100,16 @@ class Loom(val config: LoomConfig) {
         }
 
         delete("/fabrics/:name") { req, res ->
-            val name = req.params(":name")
-            fabricsDao.delete(name)
+            val fabricName = req.params(":name")
+            fabricsDao.delete(fabricName)
+            res.status(204)
+            ""
+        }
+
+        delete("/fabrics/:name/cluster") { req, res ->
+            val fabricName = req.params(":name")
+            val fabric = fabricsDao.get(fabricName) ?: throw NotFoundException(FabricNotFound(fabricName))
+            fabricManager.deleteCluster(fabric)
 
             res.status(204)
             ""
