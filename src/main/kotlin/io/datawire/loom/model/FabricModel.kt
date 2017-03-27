@@ -29,7 +29,10 @@ data class FabricModel(
         val masterType: String = "t2.nano",
 
         @JsonProperty("nodeGroups")
-        val nodeGroups: List<NodeGroup>  = listOf(NodeGroup("main", 1, "t2.nano"))) {
+        val nodeGroups: List<NodeGroup>  = listOf(NodeGroup("main", 1, "t2.nano")),
+
+        @JsonProperty("sshPublicKey")
+        val sshPublicKey: String) {
 
     val id = "$name-v$version".toLowerCase().replace(Regex("[^a-zA-Z0-9]+"), "-")
 }

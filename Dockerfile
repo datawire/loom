@@ -16,7 +16,7 @@ ENV IMPL_VERSION ${IMPL_VERSION}
 # Install System Dependencies
 #
 #
-RUN apk --no-cache add curl unzip
+RUN apk --no-cache add curl unzip git
 
 # Set WORKDIR to /service which is the root of all our apps.
 WORKDIR /service
@@ -32,9 +32,12 @@ RUN curl --output terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && sha256sum -c terraform_${TERRAFORM_VERSION}_SHA256 \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin \
     && rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && curl --output /bin/kops \
+    && curl --output /tmp/kubectl_version https://storage.googleapis.com/kubernetes-release/release/stable.txt \
+    && curl --output /bin/kubectl \
+        "https://storage.googleapis.com/kubernetes-release/release/$(cat /tmp/kubectl_version)/bin/linux/amd64/kubectl" \
+    && curl -L --output /bin/kops \
         "https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64" \
-    && chmod +x /bin/kops
+    && chmod +x /bin/kops /bin/kubectl
 
 # COPY the app code and configuration into place then perform any final configuration steps.
 COPY build/libs/loom-${IMPL_VERSION}-fat.jar \

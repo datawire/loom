@@ -11,7 +11,8 @@ import java.util.*
 fun main(args: Array<String>) {
     configureProperties()
 
-    val config = fromYaml<LoomConfig>(Paths.get(args[0]))
+    val configFile = if (args.isNotEmpty()) Paths.get(args[0]) else Paths.get("config/loom.json")
+    val config = fromYaml<LoomConfig>(configFile)
     Loom(config).run()
 }
 

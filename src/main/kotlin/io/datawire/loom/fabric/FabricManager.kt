@@ -1,6 +1,7 @@
 package io.datawire.loom.fabric
 
 import io.datawire.loom.aws.AwsProvider
+import io.datawire.loom.aws.symlinkAwsConfig
 import io.datawire.loom.core.ExternalTool
 import io.datawire.loom.data.AwsS3Dao
 import io.datawire.loom.exception.*
@@ -25,6 +26,8 @@ class FabricManager(private val terraform     : ExternalTool,
     private val backgroundTasks = Executors.newFixedThreadPool(5)
 
     private val tasks = ArrayBlockingQueue<FabricTask>(100)
+
+    val stateBucket = awsProvider.stateStorageBucket
 
     init {
         backgroundTasks.execute(FabricWorker(this))
@@ -80,7 +83,9 @@ class FabricManager(private val terraform     : ExternalTool,
         val tfTemplate = generateTemplate(tfConfig, tfProvider, listOf(networking))
         tfTemplate.write(workspace.resolve("terraform.tf.json"))
 
-        val tfTask = TerraformTask(FabricTaskContext(model, fabric, this, workspace, terraform, kops))
+        val fabCtx = FabricTaskContext(model, fabric, this, workspace, terraform, kops)
+        val tfTask = TerraformTask(fabCtx, after = CreateCluster(fabCtx))
+
         putTask(tfTask)
     }
 
@@ -120,5 +125,9 @@ class FabricManager(private val terraform     : ExternalTool,
 
     }
 
-    private fun createWorkspace(fabricName: String) = Files.createDirectories(Paths.get("/tmp", "fabric-$fabricName"))
+    private fun createWorkspace(fabricName: String): Path {
+        val res = Files.createDirectories(Paths.get("/tmp", "fabric-$fabricName"))
+        symlinkAwsConfig(res.resolve(".aws"))
+        return res
+    }
 }

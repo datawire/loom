@@ -1,5 +1,7 @@
 package io.datawire.loom.fabric.kops
 
+import java.nio.file.Path
+
 
 /**
  * Parameters to invoke `kops create cluster ...` with.
@@ -24,12 +26,13 @@ data class CreateClusterParams(
         val masterCount       : Int? = null,
         val nodeType          : String,
         val nodeCount         : Int,
-        val sshKeyName        : String?,
+        val sshPublicKey      : Path,
         val labels            : Map<String, String> = emptyMap()) {
 
     fun toCommandOptions(): List<String> {
         val res = mutableListOf(
                 "--associate-public-ip=true",
+                "--ssh-public-key=${sshPublicKey.toAbsolutePath()}",
                 "--cloud=aws",
                 "--channel=$channel",
                 "--dns=public",
@@ -48,7 +51,6 @@ data class CreateClusterParams(
         }
 
         masterCount?.let { res += "--master-count=$it" }
-        sshKeyName?.let  { res += "--ssh-public-key=$it" }
 
         return res
     }

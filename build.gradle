@@ -133,7 +133,7 @@ shadowJar {
   classifier = 'fat'
 
   manifest {
-    attributes 'Main-Class'    : 'io.datawire.loom.alpha.Loom'
+    attributes 'Main-Class'    : 'io.datawire.loom.RunnerKt'
   }
 
   mergeServiceFiles {

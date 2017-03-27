@@ -13,9 +13,9 @@ class KopsTool(private val tool: ExternalTool,
         TODO("See KopsTool1")
     }
 
-    fun deleteCluster(clusterName: String): Boolean {
+    fun deleteCluster(params: DeleteClusterParams): Boolean {
         val execCtx = prepareExecutionContext()
-        val execCmd = kops("delete", "cluster", "--name=$clusterName", "--yes")
+        val execCmd = kops("delete", "cluster", "--yes") + params.toCommandOptions()
 
         val result  = ExternalToolExecutor(execCmd, execCtx).execute()
         return when(result.exitValue) {

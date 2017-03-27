@@ -6,7 +6,7 @@ import io.datawire.loom.model.FabricModel
 import java.nio.file.Path
 
 
-class FabricTaskContext(
+data class FabricTaskContext(
         val model     : FabricModel,
         val fabric    : Fabric,
         val manager   : FabricManager,
