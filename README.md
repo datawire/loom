@@ -50,9 +50,9 @@ Loom has a very important concept of a 'Fabric Model' which basically a reusable
 
 ```bash
 $> curl -X POST \
-        -H "Content-Type: application/vnd.FabricModel-v1+json" \
-        -d '{"name": "MyFirstFabricModel", "domain": "k736.net"}' \
-        localhost:7000/fabric-models
+        -H "Content-Type: application/json" \
+        -d '{"name": "myfirstmodel", "domain": "k736.net"}' \
+        localhost:7000/models
 
 200 OK
 ```
@@ -61,18 +61,18 @@ Once a specification is registered many clusters can reuse it!
 
 ### 3. Startup a Kubernetes Cluster
 
-Let's bootup a cluster!
+Let's startup a cluster!
 
 ```bash
 $> curl -X POST \
-        -H "Content-Type: application/vnd.Fabric-v1+json" \
-        -d '{"name": "myfirstcluster", "spec": "myfirstspec"}' \
-        localhost:5000/fabrics
+        -H "Content-Type: application/json" \
+        -d '{"name": "myfirstcluster", "model": "myfirstmodel"}' \
+        localhost:7000/fabrics
 
 200 OK!
 ```
 
-### 4. Check for the cluster to come up
+### 4. Check for the cluster to come up (!! SKIP - NOT WORKING YET !!)
 
 ```bash
 $> curl -H 'Accept: application/vnd.Fabric-v1+json' \
@@ -96,8 +96,8 @@ Once the status changes to `CREATED` you can start using the cluster! The first 
 
 ```bash
 $> mkdir   ~/.kube/config.d
-$> curl -O ~/.kube/config.d/myfirstcluster \
-        localhost:7000/fabrics/myfirstfabric/cluster/kubeconfig
+$> curl --output ~/.kube/config.d/myfirstcluster \
+        localhost:7000/fabrics/myfirstfabric/cluster/config
         
 $> kubectl cluster-info --kubeconfig={$HOME}/.kube/config.d/myfirstcluster
 Kubernetes master is running at https://api.myfirstcluster.example.org
