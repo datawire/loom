@@ -14,6 +14,7 @@ import io.datawire.loom.model.FabricModel
 import org.slf4j.LoggerFactory
 import spark.Route
 import spark.Spark.*
+import java.time.Instant
 
 class Loom(val config: LoomConfig) {
 
@@ -74,7 +75,7 @@ class Loom(val config: LoomConfig) {
 
         post("/models") { req, res ->
             val model = fromJson<FabricModel>(req.body())
-            modelsDao.put(model.id, model)
+            modelsDao.put(model.id, model.copy(creationTime = Instant.now()))
             res.status(204)
         }
     }
@@ -82,7 +83,6 @@ class Loom(val config: LoomConfig) {
     private fun fabricApi() {
         post("/fabrics") { req, res ->
             val fabric = fromJson<Fabric>(req.body())
-            fabricsDao.put(fabric.name, fabric)
             fabricManager.create(fabric)
 
             res.status(204)
@@ -95,10 +95,11 @@ class Loom(val config: LoomConfig) {
                 }), Jsonifier())
 
         get("/fabrics/:name/cluster/config") { req, res ->
-
+            res.header("Content-Type", "application/yaml")
+            fabricManager.getClusterConfig(req.params(":name"))
         }
 
-        delete("/fabric/:name") { req, res ->
+        delete("/fabrics/:name") { req, res ->
             val name = req.params(":name")
             fabricsDao.delete(name)
 

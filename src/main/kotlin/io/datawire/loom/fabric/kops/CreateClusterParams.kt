@@ -31,7 +31,6 @@ data class CreateClusterParams(
         val res = mutableListOf(
                 "--associate-public-ip=true",
                 "--cloud=aws",
-                "--cloud-labels=${labels.entries.joinToString(",", prefix = "\"", postfix = "\"")}",
                 "--channel=$channel",
                 "--dns=public",
                 "--master-size=$masterType",
@@ -43,6 +42,10 @@ data class CreateClusterParams(
                 "--vpc=$networkId",
                 "--zones=${availabilityZones.joinToString(",")}"
         )
+
+        if (labels.isNotEmpty()) {
+            res += "--cloud-labels=${labels.entries.joinToString(",", prefix = "\"", postfix = "\"")}"
+        }
 
         masterCount?.let { res += "--master-count=$it" }
         sshKeyName?.let  { res += "--ssh-public-key=$it" }

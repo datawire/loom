@@ -3,17 +3,16 @@ package io.datawire.loom.fabric
 import io.datawire.loom.aws.AwsProvider
 import io.datawire.loom.core.ExternalTool
 import io.datawire.loom.data.AwsS3Dao
-import io.datawire.loom.exception.ExistsAlreadyException
-import io.datawire.loom.exception.FabricExists
-import io.datawire.loom.exception.ModelNotFound
-import io.datawire.loom.exception.NotFoundException
+import io.datawire.loom.exception.*
+import io.datawire.loom.fabric.kops.KopsTool
+import io.datawire.loom.fabric.kops.KopsToolContext
 import io.datawire.loom.fabric.terraform.*
 import io.datawire.loom.model.Fabric
 import io.datawire.loom.model.FabricModel
-import io.datawire.loom.model.FabricStatus
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.Executors
 
 
@@ -25,23 +24,45 @@ class FabricManager(private val terraform     : ExternalTool,
 
     private val backgroundTasks = Executors.newFixedThreadPool(5)
 
+    private val tasks = ArrayBlockingQueue<FabricTask>(100)
+
+    init {
+        backgroundTasks.execute(FabricWorker(this))
+        backgroundTasks.execute(FabricWorker(this))
+    }
+
+    fun putTask(task: FabricTask) = tasks.put(task)
+    fun getTask(): FabricTask     = tasks.take()
+
+    fun updateFabric(fabric: Fabric) {
+        fabrics.put(fabric.name, fabric)
+    }
+
     private fun validate(model: FabricModel, fabric: Fabric) {
         fabrics.get(fabric.name)?.let { throw ExistsAlreadyException(FabricExists(it.name)) }
+    }
+
+    fun getClusterConfig(fabricName: String): String {
+        val fabric = fabrics.get(fabricName) ?: throw NotFoundException(FabricNotFound(fabricName))
+        val model  = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
+
+        val kops = KopsTool(kops, KopsToolContext(awsProvider.stateStorageBucket, createWorkspace(fabricName)))
+        return kops.exportKubernetesConfiguration("${fabric.name}.${model.domain}")
     }
 
     fun create(fabric: Fabric): Fabric {
         val model = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
         validate(model, fabric)
 
+        fabrics.put(fabric.name, fabric)
         val workspace = createWorkspace(fabric.name)
-        val updatedFabric = fabric.copy(status = FabricStatus.PROVISION_NETWORK_STARTED)
-        createNetwork(workspace, model, updatedFabric)
 
-        return updatedFabric
+        createNetwork(workspace, model, fabric)
+        return fabric
     }
 
     private fun createNetwork(workspace: Path, model: FabricModel, fabric: Fabric) {
-        val tfProvider = TfProvider("aws", mapOf("region" to model.resolveDefaultRegion()))
+        val tfProvider = TfProvider("aws", mapOf("region" to model.region))
         val tfConfig   = TfConfig("s3", mapOf(
                 "bucket"     to awsProvider.stateStorageBucket,
                 "key"        to "fabrics/${fabric.name}.tfstate",
@@ -59,8 +80,8 @@ class FabricManager(private val terraform     : ExternalTool,
         val tfTemplate = generateTemplate(tfConfig, tfProvider, listOf(networking))
         tfTemplate.write(workspace.resolve("terraform.tf.json"))
 
-        val terraform = TerraformTool(terraform, workspace)
-        backgroundTasks.submit(TerraformRunner(terraform))
+        val tfTask = TerraformTask(FabricTaskContext(model, fabric, this, workspace, terraform, kops))
+        putTask(tfTask)
     }
 
     private fun generateNetworkingModule(source: String, params: Map<String, Any>): Pair<TfModule, List<TfOutput>> {

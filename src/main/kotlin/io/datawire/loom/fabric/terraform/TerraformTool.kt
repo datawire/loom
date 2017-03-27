@@ -3,6 +3,7 @@ package io.datawire.loom.fabric.terraform
 import io.datawire.loom.core.ExternalTool
 import io.datawire.loom.core.ExternalToolExecutor
 import io.datawire.loom.core.ExternalToolExecutorContext
+import io.datawire.loom.data.fromJson
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
@@ -36,7 +37,7 @@ class TerraformTool(
 
     fun plan(destroy: Boolean = false): TfPlanResult {
         val execCtx = prepareExecutionContext()
-        val execCmd = terraform("plan", "-no-color", "-input=false", "-out=plan.out")
+        val execCmd = terraform("plan", "-no-color", "-input=false", "-detailed-exitcode", "-out=plan.out")
 
         if (destroy) {
             execCmd + "-destroy"
@@ -63,6 +64,20 @@ class TerraformTool(
         val result = ExternalToolExecutor(execCmd, execCtx).execute()
 
         if (result.exitValue != 0) {
+            throw RuntimeException("""Unexpected Terraform exit code: ${result.exitValue}
+    Context => $execCtx
+    Command => '$execCmd'""")
+        }
+    }
+
+    fun output(): TfOutputs {
+        val execCtx = prepareExecutionContext()
+        val execCmd = terraform("output", "-no-color", "-json")
+
+        val result = ExternalToolExecutor(execCmd, execCtx).execute()
+        return if (result.exitValue == 0) {
+            fromJson<TfOutputs>(result.outputUTF8())
+        } else {
             throw RuntimeException("""Unexpected Terraform exit code: ${result.exitValue}
     Context => $execCtx
     Command => '$execCmd'""")

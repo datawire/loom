@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "error")
 @JsonSubTypes(
-        JsonSubTypes.Type(value = ModelNotFound::class,  name = "MODEL_EXISTS"),
-        JsonSubTypes.Type(value = FabricNotFound::class, name = "FABRIC_EXISTS")
+        JsonSubTypes.Type(value = ModelExists::class,  name = "MODEL_EXISTS"),
+        JsonSubTypes.Type(value = FabricExists::class, name = "FABRIC_EXISTS")
 )
 sealed class ExistsAlready(val id: String)
 

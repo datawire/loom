@@ -25,7 +25,13 @@ fun toJson(any: Any?, pretty: Boolean = true): String {
 
 fun toYaml(any: Any?): String = YAML_MAPPER.writeValueAsString(any)
 
-fun toJson(path: Path, any: Any?) = JSON_MAPPER.writeValue(path.toFile(), any)
+fun toJson(path: Path, any: Any?, pretty: Boolean = true) {
+    return when {
+        pretty -> JSON_MAPPER.writer().withDefaultPrettyPrinter().writeValue(path.toFile(), any)
+        else   -> JSON_MAPPER.writeValue(path.toFile(), any)
+    }
+}
+
 fun toYaml(path: Path, any: Any?) = YAML_MAPPER.writeValue(path.toFile(), any)
 
 fun <T: Any> fromJson(data: String, clazz: KClass<T>): T = JSON_MAPPER.readValue(data, clazz.java)

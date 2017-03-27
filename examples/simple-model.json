@@ -1,10 +1,9 @@
 {
-  "name"           : "simple",
-  "version"        : 1,
-  "allowedRegions" : ["us-east-1"],
-  "defaultRegion"  : "us-east-1",
-  "domain"         : "k736.net",
-  "masterType"     : "t2.nano",
+  "name"       : "simple",
+  "version"    : 1,
+  "region"     : "us-east-1",
+  "domain"     : "k736.net",
+  "masterType" : "t2.nano",
 
   "networking": {
     "module": "github.com/datawire/loom//src/terraform/network-v2"
