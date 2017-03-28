@@ -7,7 +7,7 @@ Usage:
 
 Options:
     -h --help       Show this screen.
-    --no-push       DO NOT push image tags to a remote Docker repository.
+    --push          DO push image tags to a remote Docker repository.
     --version       The version of this program.
 
 """
@@ -24,9 +24,9 @@ def check_semver(text):
 
 
 def cmd(args, print_stdout=True):
-    cmd = shlex.split(args)
+    command = shlex.split(args)
 
-    process = Popen(cmd, stdout=PIPE, stderr=STDOUT)
+    process = Popen(command, stdout=PIPE, stderr=STDOUT)
     lines = []
     while True:
         output = process.stdout.readline()
@@ -35,7 +35,7 @@ def cmd(args, print_stdout=True):
         if output:
             line = output.strip()
             if print_stdout:
-                print("=> " + line)
+                print(" | " + line)
             lines.append(line)
 
     rc = process.poll()
@@ -56,17 +56,29 @@ def gradle(args):
     return cmd("./gradlew {}".format(args), print_stdout=False)[1].rstrip()
 
 
-def handle_git_tag(repo, commit, tag):
-    if tag == 'latest':
+def handle_git_tag(repo, git_commit, git_tag):
+
+    """Tag a Docker image.
+    
+    The tag of the Docker image will be the same as the Git tag. The Git tag must be semantic version ("semver") 
+    compliant otherwise an error will be raised.
+    
+    A new Docker image is *NOT* built for the tag rather it is assumed that the tag points to a Docker image for the
+    previous commit.
+    """
+
+    if git_tag == 'latest':
         raise ValueError('Invalid tag name "latest" not allowed!')
 
-    check_semver(tag)
+    check_semver(git_tag)
 
     print("==> Triggered from Tag <{0}>: Pulling Docker image associated with the tagged commit and adding "
-          + "additional tag for version (version: {0})".format(tag))
+          + "additional tag for version (version: {0})".format(git_tag))
 
-    docker("pull {}:{}".format(repo, commit))
-    docker("tag  {0}:{1} {0}:{2}".format(repo, commit, tag))
+    # If we're tagging an image it *should* have had a previous Docker build and push at some point in its history and
+    # therefore we do not need to rebuild the image.
+    docker("pull {0}:{1}".format(repo, git_commit))
+    docker("tag  {0}:{1} {0}:{2}".format(repo, git_commit, git_tag))
 
 
 def main(args):
@@ -84,12 +96,14 @@ def main(args):
     elif is_tag:
         handle_git_tag(docker_repo, commit, version)
     else:
+        # Version is "latest" for master branch builds coming off Travis. If a build occurs on a branch then it will
+        # be the branch name.
         tags = ['-t {0}:{1}'.format(docker_repo, version)]
         if commit:
             tags.append('-t {0}:{1}'.format(docker_repo, commit))
 
         if build_number:
-            tags.append('-t {0}:{1}'.format(docker_repo, build_number))
+            tags.append('-t {0}:travis-{1}'.format(docker_repo, build_number))
 
         tags = ' '.join(tags)
 
@@ -98,11 +112,11 @@ def main(args):
 
         docker('build {0} --build-arg IMPL_VERSION={1} .'.format(tags, version))
 
-    if args['--no-push']:
+    if args['--push']:
+        docker('push {}'.format(docker_repo))
+    else:
         print("==> Skipping Docker image push")
         return
-    else:
-        docker('push {}'.format(docker_repo))
 
 
 if __name__ == '__main__':

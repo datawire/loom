@@ -9,27 +9,26 @@ jdk:
 addons:
   apt:
     packages:
-    - python3
+      - python3
 
 services:
   - docker
 
 env:
   global:
-  - DOCKER_REPO=datawire/loom
-  - COMMIT=${TRAVIS_COMMIT::8}
+    - DOCKER_REPO=datawire/loom
+    - COMMIT=${TRAVIS_COMMIT::8}
 
 before_script:
-  - pip install docopt semantic_version
+  - pip install -Ur ci/requirements.txt
 
 script:
   - ./gradlew clean test shadowJar
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && ci/dockerize.py
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && ci/dockerize.py --push
 
-# Done as *strongly* recommended by https://docs.travis-ci.com/user/languages/java/#Caching
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
     - $HOME/.gradle/caches/

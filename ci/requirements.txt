@@ -1,0 +1,7 @@
+# file: ci/requirements.txt
+#
+# Python dependencies used by CI tooling.
+#
+
+docopt
+semantic_version
