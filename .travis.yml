@@ -23,6 +23,7 @@ before_script:
   - pip install -Ur ci/requirements.txt
 
 script:
+  - set -e
   - ./gradlew clean test shadowJar
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && ci/dockerize.py --push
 
