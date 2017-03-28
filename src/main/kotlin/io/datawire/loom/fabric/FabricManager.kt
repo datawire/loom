@@ -57,10 +57,11 @@ class FabricManager(private val terraform     : ExternalTool,
         val model = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
         validate(model, fabric)
 
-        fabrics.put(fabric.name, fabric.copy(clusterName = "${fabric.name}.${model.domain}"))
+        val resolvedNameFabric = fabric.copy(clusterName = "${fabric.name}.${model.domain}")
+        fabrics.put(fabric.name, resolvedNameFabric)
         val workspace = createWorkspace(fabric.name)
 
-        createNetwork(workspace, model, fabric)
+        createNetwork(workspace, model, resolvedNameFabric)
         return fabric
     }
 
