@@ -105,3 +105,32 @@ KubeDNS is running at https://api.myfirstcluster.example.org/api/v1/proxy/namesp
 ```
 
 **NOTE:** The `kubectl` command does not *yet* understand the `config.d` idiom, but there is a Pull Request moving along to enable this functionality in `kubectl`. The idea is that `kubectl` would load all the config files in this directory before use. Until then we need to simulate usage with the `--kubeconfig=<path>` option.
+
+## Releases
+
+### Versioning
+
+Loom follows [Semantic Versioning 2.0](semver.org) for version numbers.
+
+### Docker Images
+
+Public docker images are published to [datawire/loom](https://hub.docker.com/r/datawire/hello/)
+
+The tagging strategy for Docker images is described in the table below. The "pointer" column describes whether the image tag is stable or changing to point to the latest published image (e.g. `:latest`).
+
+| Tag                              | When                                 | Pointer |
+| -------------------------------- | ------------------------------------ | ------- |
+| `:${Git-Commit-Hash}`            | Every successful build on any branch | No      |
+| `:${Version}`                    | Every tag                            | No      |
+| `:latest`                        | Every successful build               | Yes     |
+| `:travis-${Travis-Build-Number}` | Every successful build on any branch | No      |
+
+It is strongly recommend that production users use the `:${Version}` tag.
+
+### Amazon Machine Image
+
+Coming Soon
+
+## License
+
+Project is open-source software licensed under Apache 2.0. Please see [License](LICENSE) for further details.
