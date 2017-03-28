@@ -118,7 +118,7 @@ Loom follows [Semantic Versioning 2.0](semver.org) for version numbers.
 
 ### Docker Images
 
-Public docker images are published to [datawire/loom](https://hub.docker.com/r/datawire/hello/)
+Public docker images are published to [datawire/loom](https://hub.docker.com/r/datawire/loom/)
 
 The tagging strategy for Docker images is described in the table below. The "pointer" column describes whether the image tag is stable or changing to point to the latest published image (e.g. `:latest`).
 
