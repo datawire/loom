@@ -12,7 +12,12 @@ class BuildInfo {
     fun handleTravisCi(): String {
         val branch = env("TRAVIS_BRANCH") ?: throw IllegalStateException("TRAVIS_BRANCH environment variable not set.")
         val tag    = env("TRAVIS_TAG")
-        return tag ?: branch.replace(Regex(".*/"), "")
+        return when {
+            tag != null        -> tag
+            branch != "master" -> branch.replace(Regex(".*/"), "")
+            branch == "master" -> "latest"
+            else               -> "unknown"
+        }
     }
 
     fun handleLocal(): String {
