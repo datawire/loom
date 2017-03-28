@@ -1,5 +1,20 @@
 Ignore all the fabric model stuff that's ops-centric. To get a cluster in Loom:
 
+Bake Docker Image
+
+```./alpha_bake.sh``` produces `datawire/loom` image.
+
+Run Loom
+
+```
+docker run --rm -it \
+    -p 7000:7000 \
+    -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
+    -e AWS_SECRET_ACCESS_KEY=<Your-AWS-API-Secret-Key> \
+    -e AWS_REGION=us-east-1 \
+    datawire/loom
+```
+
 Fabric Setup
 
 ```bash
