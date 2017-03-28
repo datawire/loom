@@ -1,6 +1,8 @@
 # Loom
 
 [![Build Status](https://travis-ci.org/datawire/loom.svg?branch=master)](https://travis-ci.org/datawire/loom)
+[![Join the chat at https://gitter.im/datawire/loom](https://badges.gitter.im/datawire/loom.svg)](https://gitter.im/datawire/loom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.1.1-blue.svg)](https://kotlinlang.org/)
 
 Loom enables operations engineers to provide a self-serve Kubernetes provisioning experience for developers and much more! Developers love Kubernetes, but it's a pain to get up and running on AWS and ops engineers usually have better things to be doing than babysitting devs as they get up and running with Kubernetes.
 
