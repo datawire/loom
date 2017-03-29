@@ -6,7 +6,7 @@
 
 Loom enables operations engineers to provide a self-serve Kubernetes provisioning experience for developers and much more! Developers love Kubernetes, but it's a pain to get up and running on AWS and ops engineers usually have better things to be doing than babysitting devs as they get up and running with Kubernetes.
 
-Thus we have Loom! Operators install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes fabrics. Loom handles all the nitty gritty details of network creation and cluster management.
+Thus we have Loom! Ops engineers install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes fabrics. Loom handles all the nitty gritty details of network creation, cluster setup and management.
 
 ## What is a Kubernetes "Fabric"?
 
@@ -28,23 +28,38 @@ Loom is packaged as a Docker image. It can be started with a `docker run ...` co
 - An AWS S3 bucket where Loom can store app state and config. The name will be `loom-state-${AWS_ACCOUNT_ID}`.
 - An AWS DynamoDB table named `loom_terraform_state_lock` which is used internally when provisioning for state management safety against concurrent executions.
 
-```
+To start Loom run the docker container. Depending on how you store your AWS credentials and config there are two startup options:
+
+
+**Preferred: Use AWS credentials and config in `$HOME/.aws` directory**
+`$> docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha`
+
+**Alternative: Set environment variables**
+
+```bash
 $> docker run --rm -it \
     -p 7000:7000 \
     -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
     -e AWS_SECRET_ACCESS_KEY=<Your-AWS-API-Secret-Key> \
     -e AWS_REGION=us-east-1 \
-    datawire/loom:0.1.0
-
-2017-03-23 19:39:29.144 INFO [vert.x-eventloop-thread-0] i.d.l.v.Loom - Loom starting...
-2017-03-23 19:39:30.007 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS bootstrap started
-2017-03-23 19:39:30.235 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS S3 bucket for Loom state store created: loom-state-914373874199
-2017-03-23 19:39:30.428 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS DynamoDB table for Loom terraform state locks created: loom_terraform_state_lock
-2017-03-23 19:39:30.428 INFO [vert.x-eventloop-thread-0] i.d.l.v.s.Bootstrap - AWS bootstrap completed
-2017-03-23 19:39:30.610 INFO [vert.x-eventloop-thread-0] i.d.l.v.Loom - Loom started! Listening @ http://0.0.0.0:7000
+    datawire/alpha
 ```
 
-Once you see the Loom `Loom started! Listening @ http://0.0.0.0:7000` message you can start playing with Loom.
+When Loom starts you will see some output similar to below
+
+```
+[...]
+
+2017-03-29 06:17:14.354 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap started
+2017-03-29 06:17:14.553 INFO [main] i.d.l.c.Bootstrap - AWS S3 bucket for Loom state store existed already: loom-state-XXX
+2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS DynamoDB table for Loom terraform state locks existed already: loom_terraform_state_lock
+2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap completed
+2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - == Loom has started ...
+2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - >> Listening on 0.0.0.0:7000
+
+```
+
+Once you see the Loom `>> Listening on 0.0.0.0:7000` message you can start playing with Loom.
 
 ### 2. Define a Fabric Model
 
