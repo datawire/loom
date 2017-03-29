@@ -71,7 +71,7 @@ Consider a scenario as an ops engineer where you want to allow developers to spi
 
 1. Create an SSH key pair that can be attached to the underlying Kubernetes master and worker nodes:
 
-   `ssh-keygen -f ~/loom.key -t rsa -b 4096 -N ''`
+   `ssh-keygen -f ~/.ssh/loom.key -t rsa -b 4096 -N ''`
    
 2. Create a new Fabric Model:
 
