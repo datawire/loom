@@ -71,18 +71,18 @@ Consider a scenario as an ops engineer where you want to allow developers to spi
 
 1. Create an SSH key pair that can be attached to the underlying Kubernetes master and worker nodes:
 
-   `ssh-keygen -f ~/loom.key -t rsa -b 4096 -N ''
+   `ssh-keygen -f ~/loom.key -t rsa -b 4096 -N ''`
    
 2. Create a new Fabric Model:
 
    ```bash
    curl -v -X POST \
-        -H "Content-Type: application/json"
+        -H "Content-Type: application/json" \
         -d '{"name": "simple", "version": 1, "domain": "${YOUR_DOMAIN}", "sshPublicKey": "'"$(cat ~/loom.key.pub)"'"}' \
         localhost:7000/models
    ```
 
-Once a model is registered many clusters can reuse it!
+Once a model is registered many clusters can reuse it! Models are identified as `${NAME}-v${VERSION}` so the above model would be `simple-v1`.
 
 ### 3. Startup a Kubernetes Fabric
 
@@ -107,7 +107,7 @@ curl --output ~/.kube/config.d/myfirstcluster \
 
 ### 5. Talking to Kubernetes
 
-Loom lacks a fabric status API right now, but if you wait about 3 to 5 minutes (Go get a coffee!) after creating the cluster and getting your credentials then you should be able to do this:
+Loom does not have a fabric status API right now, but if you wait about 3 to 5 minutes (go get a coffee!) after creating the cluster and getting your credentials then you should be able to do this:
 
 ```bash
 kubectl cluster-info --kubeconfig={$HOME}/.kube/config.d/myfirstcluster
