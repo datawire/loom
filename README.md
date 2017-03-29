@@ -78,7 +78,7 @@ Consider a scenario as an ops engineer where you want to allow developers to spi
    ```bash
    curl -v -X POST \
         -H "Content-Type: application/json" \
-        -d '{"name": "simple", "version": 1, "domain": "${YOUR_DOMAIN}", "sshPublicKey": "'"$(cat ~/loom.key.pub)"'"}' \
+        -d '{"name": "simple", "version": 1, "domain": "${YOUR_DOMAIN}", "sshPublicKey": "'"$(cat ~/.ssh/loom.key.pub)"'"}' \
         localhost:7000/models
    ```
 
