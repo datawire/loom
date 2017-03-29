@@ -23,35 +23,35 @@ This is a simple demonstration of Loom. For more detailed install instructions f
 
 ### 1. Run Loom
 
-Loom is packaged as a Docker image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
+Loom is packaged as a [Docker](https://docker.com) image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
 
 - An AWS S3 bucket where Loom can store app state and config. The name will be `loom-state-${AWS_ACCOUNT_ID}`.
 - An AWS DynamoDB table named `loom_terraform_state_lock` which is used internally when provisioning for state management safety against concurrent executions.
 
-To start Loom run the docker container. Depending on how you store your AWS credentials and config there are two startup options:
-
+Depending on how you store your AWS credentials and config there are two common run options:
 
 **Preferred: Use AWS credentials and config in `$HOME/.aws` directory**
-`$> docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha`
 
-**Alternative: Set environment variables**
+`docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha`
+
+**Alternative: Set AWS environment variables**
 
 ```bash
-$> docker run --rm -it \
-    -p 7000:7000 \
-    -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
-    -e AWS_SECRET_ACCESS_KEY=<Your-AWS-API-Secret-Key> \
-    -e AWS_REGION=us-east-1 \
-    datawire/alpha
+docker run --rm -it \
+  -p 7000:7000 \
+  -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
+  -e AWS_SECRET_ACCESS_KEY=<Your-AWS-API-Secret-Key> \
+  -e AWS_REGION=us-east-1 \
+  datawire/alphas
 ```
 
 When Loom starts you will see some output similar to below
 
-```
+```text
 [...]
 
 2017-03-29 06:17:14.354 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap started
-2017-03-29 06:17:14.553 INFO [main] i.d.l.c.Bootstrap - AWS S3 bucket for Loom state store existed already: loom-state-XXX
+2017-03-29 06:17:14.553 INFO [main] i.d.l.c.Bootstrap - AWS S3 bucket for Loom state store created: loom-state-XXX
 2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS DynamoDB table for Loom terraform state locks existed already: loom_terraform_state_lock
 2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap completed
 2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - == Loom has started ...
@@ -63,15 +63,15 @@ Once you see the Loom `>> Listening on 0.0.0.0:7000` message you can start playi
 
 ### 2. Define a Fabric Model
 
-Open a second terminal that can act as your client to interact with the running Loom server.
+Open a second terminal that can act as your client to interact with the Loom server.
 
 Loom has a very important concept of a 'Fabric Model' which basically a reusable template and configuration that many fabrics deployed by loom can use to simplify configuration. The purpose of a "Fabric Model" is to keep the Operator in control of things like size of Kubernetes nodes or what SSH key pairs to assign to instances. Consider a scenario as an ops engineer where you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters for experimentation or CI tests without handing over full control or exposing unnecessary complexity. Let's create our first model which will be named `MyFirstFabricModel` and uses the domain name `mycompany.com`.
 
 ```bash
-$> curl -X POST \
-        -H "Content-Type: application/json" \
-        -d '{"name": "myfirstmodel", "domain": "k736.net"}' \
-        localhost:7000/models
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"name": "myfirstmodel", "domain": "k736.net"}' \
+     localhost:7000/models
 
 200 OK
 ```
@@ -142,6 +142,7 @@ The tagging strategy for Docker images is described in the table below. The "poi
 | `:${Git-Commit-Hash}`            | Every successful build on any branch | No      |
 | `:${Version}`                    | Every tag                            | No      |
 | `:latest`                        | Every successful build               | Yes     |
+| `:${Branch-Name}`                | Every successful build on any branch | Yes     | 
 | `:travis-${Travis-Build-Number}` | Every successful build on any branch | No      |
 
 It is strongly recommend that production users use the `:${Version}` tag.
