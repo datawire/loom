@@ -52,7 +52,7 @@ When Loom starts you will see some output similar to below
 
 2017-03-29 06:17:14.354 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap started
 2017-03-29 06:17:14.553 INFO [main] i.d.l.c.Bootstrap - AWS S3 bucket for Loom state store created: loom-state-XXX
-2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS DynamoDB table for Loom terraform state locks existed already: loom_terraform_state_lock
+2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS DynamoDB table for Loom terraform state locks created: loom_terraform_state_lock
 2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap completed
 2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - == Loom has started ...
 2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - >> Listening on 0.0.0.0:7000
