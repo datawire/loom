@@ -42,7 +42,7 @@ docker run --rm -it \
   -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
   -e AWS_SECRET_ACCESS_KEY=<Your-AWS-API-Secret-Key> \
   -e AWS_REGION=us-east-1 \
-  datawire/alphas
+  datawire/alpha
 ```
 
 When Loom starts you will see some output similar to below
