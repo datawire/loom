@@ -19,7 +19,8 @@ This is a simple demonstration of Loom. For more detailed install instructions f
 ### Prerequisites
 
 - Access to an active pair of AWS credentials.
-- [Docker](https://docker.io)
+- [Docker](https://docker.io).
+- A Route 53 controlled domain (e.g. `example.org`).
 
 ### 1. Run Loom
 
@@ -56,7 +57,6 @@ When Loom starts you will see some output similar to below
 2017-03-29 06:17:14.761 INFO [main] i.d.l.c.Bootstrap - AWS bootstrap completed
 2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - == Loom has started ...
 2017-03-29 06:17:14.773 INFO [main] i.d.l.Loom - >> Listening on 0.0.0.0:7000
-
 ```
 
 Once you see the Loom `>> Listening on 0.0.0.0:7000` message you can start playing with Loom.
@@ -65,63 +65,57 @@ Once you see the Loom `>> Listening on 0.0.0.0:7000` message you can start playi
 
 Open a second terminal that can act as your client to interact with the Loom server.
 
-Loom has a very important concept of a 'Fabric Model' which basically a reusable template and configuration that many fabrics deployed by loom can use to simplify configuration. The purpose of a "Fabric Model" is to keep the Operator in control of things like size of Kubernetes nodes or what SSH key pairs to assign to instances. Consider a scenario as an ops engineer where you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters for experimentation or CI tests without handing over full control or exposing unnecessary complexity. Let's create our first model which will be named `MyFirstFabricModel` and uses the domain name `mycompany.com`.
+Loom has a very important concept of a 'Fabric Model' which basically a reusable configuration that Fabrics created by Loom can use to simplify configuration. The purpose of a "Fabric Model" is to keep the Operations Engineer in control of most operational parameters for a cluster such as count or size of Kubernetes nodes, the SSH public key to assign to instances or the root domain to use for all clusters. 
+
+Consider a scenario as an ops engineer where you want to allow developers to spin up very small `t2.nano` powered Kubernetes clusters for experimentation or CI tests without handing over full control or exposing unnecessary complexity. Let's create our first model named `simple` and uses the domain name `example.org` (substitute your own domain for this exercise).
+
+1. Create an SSH key pair that can be attached to the underlying Kubernetes master and worker nodes:
+
+   `ssh-keygen -f ~/loom.key -t rsa -b 4096 -N ''
+   
+2. Create a new Fabric Model:
+
+   ```bash
+   curl -v -X POST \
+        -H "Content-Type: application/json"
+        -d '{"name": "simple", "version": 1, "domain": "${YOUR_DOMAIN}", "sshPublicKey": "'"$(cat ~/loom.key.pub)"'"}' \
+        localhost:7000/models
+   ```
+
+Once a model is registered many clusters can reuse it!
+
+### 3. Startup a Kubernetes Fabric
+
+Let's start a fabric! Choose a name for your fabric, for example: `philsfab` or `testing`. We'll use the Model we setup in the previous step which 
 
 ```bash
-curl -X POST \
+curl -v -X POST \
      -H "Content-Type: application/json" \
-     -d '{"name": "myfirstmodel", "domain": "k736.net"}' \
-     localhost:7000/models
-
-200 OK
+     -d '{"name": "myfirstcluster", "model": "simple-v1"}' \
+     localhost:7000/fabrics
 ```
 
-Once a specification is registered many clusters can reuse it!
+### 4. Get your Kubernetes credentials
 
-### 3. Startup a Kubernetes Cluster
-
-Let's startup a cluster!
+Talking to Kubernetes still requires credentials and you need Loom to give them to you:
 
 ```bash
-$> curl -X POST \
-        -H "Content-Type: application/json" \
-        -d '{"name": "myfirstcluster", "model": "myfirstmodel"}' \
-        localhost:7000/fabrics
-
-200 OK!
+mkdir ~/.kube/config.d
+curl --output ~/.kube/config.d/myfirstcluster \
+    localhost:7000/fabrics/myfirstfabric/cluster/config
 ```
 
-### 4. Check for the cluster to come up (!! SKIP - NOT WORKING YET !!)
+### 5. Talking to Kubernetes
+
+Loom lacks a fabric status API right now, but if you wait about 3 to 5 minutes (Go get a coffee!) after creating the cluster and getting your credentials then you should be able to do this:
 
 ```bash
-$> curl -H 'Accept: application/vnd.Fabric-v1+json' \
-        localhost:5000/fabrics/myfirstcluster
-
-{
-  "name"           : "myfirstcluster",
-  "creationTime"   : "2017-03-10'T'00:00:00",
-  "activationTime" : null,
-  "provider"       : "AWS",
-  "status"         : "CREATION_IN_PROGRESS",
-  "owner"          : "plombardi",
-}
+kubectl cluster-info --kubeconfig={$HOME}/.kube/config.d/myfirstcluster
+Kubernetes master is running at <Some-URL>
+KubeDNS is running at <Some-URL>
 ```
 
-When `CREATION_IN_PROGRESS` changes to `CREATED` then you can start using your Kubernetes cluster.
-
-### 5. Use your cluster
-
-Once the status changes to `CREATED` you can start using the cluster! The first step to using your cluster is to get the [kubeconfig](https://kubernetes.io/docs/concepts/cluster-administration/authenticate-across-clusters-kubeconfig/) for the cluster:
-
-```bash
-$> mkdir   ~/.kube/config.d
-$> curl --output ~/.kube/config.d/myfirstcluster \
-        localhost:7000/fabrics/myfirstfabric/cluster/config
-        
-$> kubectl cluster-info --kubeconfig={$HOME}/.kube/config.d/myfirstcluster
-Kubernetes master is running at https://api.myfirstcluster.example.org
-KubeDNS is running at https://api.myfirstcluster.example.org/api/v1/proxy/namespaces/kube-system/services/kube-dns
-```
+Cluster up and running! Now you can use `kubectl` to actually do work with Kubernetes.
 
 **NOTE:** The `kubectl` command does not *yet* understand the `config.d` idiom, but there is a Pull Request moving along to enable this functionality in `kubectl`. The idea is that `kubectl` would load all the config files in this directory before use. Until then we need to simulate usage with the `--kubeconfig=<path>` option.
 
