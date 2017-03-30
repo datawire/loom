@@ -22,8 +22,8 @@ class Loom(val config: LoomConfig) {
 
     private val awsProvider = AwsProvider(config.amazon)
 
-    private val modelsDao      = AwsS3Dao<FabricModel>(awsProvider, FabricModel::class, "models")
-    private val fabricsDao     = AwsS3Dao<Fabric>(awsProvider, Fabric::class, "fabrics")
+    private val modelsDao  = AwsS3Dao<FabricModel>(awsProvider, FabricModel::class, "models")
+    private val fabricsDao = AwsS3Dao<Fabric>(awsProvider, Fabric::class, "fabrics")
 
     private val fabricManager = FabricManager(
             config.terraform, config.kops, awsProvider, modelsDao, fabricsDao)
@@ -35,20 +35,6 @@ class Loom(val config: LoomConfig) {
         ipAddress(config.host)
 
         exceptionHandlers()
-
-        exception(NotFoundException::class.java) { ex, req, res ->
-            (ex as? NotFoundException)?.let {
-                res.status(404)
-                res.body(toJson(it.notFound))
-            }
-        }
-
-        exception(ExistsAlreadyException::class.java) { ex, req, res ->
-            (ex as? ExistsAlreadyException)?.let {
-                res.status(409)
-                res.body(toJson(it.existsAlready))
-            }
-        }
 
         get("/health") { req, res -> "I am healthy" }
 
@@ -64,7 +50,7 @@ class Loom(val config: LoomConfig) {
                 { req, res ->
                     val id = req.params(":id")
                     res.header("Content-Type", "application/json")
-                    modelsDao.get(req.params(":id")) ?: throw NotFoundException(ModelNotFound(id))
+                    modelsDao.get(req.params(":id")) ?: throw modelNotExists(id)
                 }), Jsonifier())
 
         delete("/models/:id") { req, res ->
@@ -93,7 +79,7 @@ class Loom(val config: LoomConfig) {
         get("/fabrics/:name", "application/json", Route(
                 { req, res ->
                     val id = req.params(":name")
-                    fabricsDao.get(req.params(":name")) ?: throw NotFoundException(FabricNotFound(id))
+                    fabricsDao.get(req.params(":name")) ?: throw fabricNotExists(id)
                 }), Jsonifier())
 
         get("/fabrics/:name/cluster/config") { req, res ->
@@ -110,7 +96,7 @@ class Loom(val config: LoomConfig) {
 
         delete("/fabrics/:name/cluster") { req, res ->
             val fabricName = req.params(":name")
-            val fabric = fabricsDao.get(fabricName) ?: throw NotFoundException(FabricNotFound(fabricName))
+            val fabric = fabricsDao.get(fabricName) ?: throw fabricNotExists(fabricName)
             fabricManager.deleteCluster(fabric)
 
             res.status(204)
@@ -119,29 +105,20 @@ class Loom(val config: LoomConfig) {
     }
 
     private fun exceptionHandlers() {
-        fun handleError(ex: Exception, req: Request, res: Response) {
-            val loomEx = (ex as? LoomException) ?: LoomException(cause = ex)
-
-            logger.error("Exception processing request ({}, {})", req.requestMethod(), req.pathInfo(), loomEx)
-
-            val errorInfo = lookupByException(ex)
-            val errorDetail = ErrorDetail(
-                    errorInfo.id.toString(),
-                    errorInfo.name,
-                    errorInfo.description)
-
-            with(res) {
-                res.status(errorInfo.httpStatusCode)
-                res.header("Content-Type", "application/json")
-                res.body(toJson(Results("errors", listOf(errorDetail))))
-            }
+        fun buildResponse(ex: Exception, req: Request, res: Response) {
+            val temp = ex as? LoomException ?: LoomException(cause = ex)
+            val (httpStatus, errors) = temp.getStatusCodeAndErrorDetails()
+            res.status(httpStatus)
+            res.header("Content-Type", "application/json")
+            res.body(toJson(errors))
         }
 
-        exception<ResourceNotExistsException>(::handleError)
-        exception<ResourceExistsException>(::handleError)
-    }
+        notFound { req, res ->
+            res.status(404)
+            res.body()
+        }
 
-    private fun toError() {
-
+        exception<LoomException>(::buildResponse)
+        exception<Exception>(::buildResponse)
     }
 }

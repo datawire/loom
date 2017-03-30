@@ -1,6 +1,10 @@
-package io.datawire.loom.model
+package io.datawire.loom.exception
 
 import io.datawire.loom.exception.LoomException
+import io.datawire.loom.model.ClusterReference
+import io.datawire.loom.model.EntityReference
+import io.datawire.loom.model.FabricReference
+import io.datawire.loom.model.ModelReference
 
 class ResourceExistsException(val reference: EntityReference,
                               message: String? = null) : LoomException(message = message)

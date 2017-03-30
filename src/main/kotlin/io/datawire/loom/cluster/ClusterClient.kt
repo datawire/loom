@@ -15,21 +15,6 @@ class ClusterClient(private val clusterContext: ClusterContext,
 
     private val logger = LoggerFactory.getLogger(ClusterClient::class.java)
 
-//    fun isClusterAvailable(): Future<Boolean> {
-//        val fut = Future.future<Boolean>()
-//
-//        val http = vertx.createHttpClient(httpOptions)
-//        val request = http.get("/api")
-//                .putHeader(HttpHeaders.ACCEPT, "application/json")
-//                .putHeader(HttpHeaders.AUTHORIZATION, "Basic ${clusterContext.user.basicAuthCredential}")
-//
-//        request.handler { fut.complete(it.statusCode() / 100 == 2) }
-//        request.exceptionHandler { fut.fail(it) }
-//
-//        request.end()
-//
-//        return fut
-//    }
 }
 
 fun main(args: Array<String>) {

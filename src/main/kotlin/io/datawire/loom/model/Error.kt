@@ -1,12 +1,14 @@
 package io.datawire.loom.model
 
+import io.datawire.loom.exception.ResourceExistsException
+import io.datawire.loom.exception.ResourceNotExistsException
 import org.eclipse.jetty.http.HttpStatus.*
 
 
-enum class ErrorInfo(val id: Int, val description: String, val httpStatusCode: Int) {
+enum class Error(val id: Int, val description: String, val httpStatusCode: Int) {
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Errors related to internal processing have the lowest range (1..999)
+    // Error related to internal processing have the lowest range (1..999)
     // -----------------------------------------------------------------------------------------------------------------
 
     GENERAL_ERROR   (1, "Error of unspecified origin or type occurred", INTERNAL_SERVER_ERROR_500),
@@ -36,22 +38,22 @@ enum class ErrorInfo(val id: Int, val description: String, val httpStatusCode: I
     CLUSTER_EXISTS    (1201, "The cluster already exists", NOT_FOUND_404);
 }
 
-fun lookupByException(ex: Exception): ErrorInfo {
+fun lookupByException(ex: Exception): Error {
     return when (ex) {
         is ResourceNotExistsException -> {
             when (ex.reference) {
-                is ModelReference   -> ErrorInfo.MODEL_NOT_EXISTS
-                is FabricReference  -> ErrorInfo.FABRIC_NOT_EXISTS
-                is ClusterReference -> ErrorInfo.CLUSTER_NOT_FOUND
+                is ModelReference   -> Error.MODEL_NOT_EXISTS
+                is FabricReference  -> Error.FABRIC_NOT_EXISTS
+                is ClusterReference -> Error.CLUSTER_NOT_FOUND
             }
         }
         is ResourceExistsException -> {
             when (ex.reference) {
-                is ModelReference   -> ErrorInfo.MODEL_EXISTS
-                is FabricReference  -> ErrorInfo.FABRIC_EXISTS
-                is ClusterReference -> ErrorInfo.CLUSTER_EXISTS
+                is ModelReference   -> Error.MODEL_EXISTS
+                is FabricReference  -> Error.FABRIC_EXISTS
+                is ClusterReference -> Error.CLUSTER_EXISTS
             }
         }
-        else -> ErrorInfo.GENERAL_ERROR
+        else -> Error.GENERAL_ERROR
     }
 }
