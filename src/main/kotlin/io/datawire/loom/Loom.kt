@@ -4,14 +4,14 @@ import io.datawire.loom.aws.AwsProvider
 import io.datawire.loom.config.LoomConfig
 import io.datawire.loom.core.Bootstrap
 import io.datawire.loom.data.*
-import io.datawire.loom.exception.ExistsAlreadyException
-import io.datawire.loom.exception.FabricNotFound
-import io.datawire.loom.exception.ModelNotFound
-import io.datawire.loom.exception.NotFoundException
+import io.datawire.loom.exception.*
 import io.datawire.loom.fabric.FabricManager
-import io.datawire.loom.model.Fabric
-import io.datawire.loom.model.FabricModel
+import io.datawire.loom.internal.exception
+import io.datawire.loom.model.*
+import org.eclipse.jetty.http.HttpStatus
 import org.slf4j.LoggerFactory
+import spark.Request
+import spark.Response
 import spark.Route
 import spark.Spark.*
 import java.time.Instant
@@ -33,6 +33,8 @@ class Loom(val config: LoomConfig) {
 
         port(config.port)
         ipAddress(config.host)
+
+        exceptionHandlers()
 
         exception(NotFoundException::class.java) { ex, req, res ->
             (ex as? NotFoundException)?.let {
@@ -114,5 +116,32 @@ class Loom(val config: LoomConfig) {
             res.status(204)
             ""
         }
+    }
+
+    private fun exceptionHandlers() {
+        fun handleError(ex: Exception, req: Request, res: Response) {
+            val loomEx = (ex as? LoomException) ?: LoomException(cause = ex)
+
+            logger.error("Exception processing request ({}, {})", req.requestMethod(), req.pathInfo(), loomEx)
+
+            val errorInfo = lookupByException(ex)
+            val errorDetail = ErrorDetail(
+                    errorInfo.id.toString(),
+                    errorInfo.name,
+                    errorInfo.description)
+
+            with(res) {
+                res.status(errorInfo.httpStatusCode)
+                res.header("Content-Type", "application/json")
+                res.body(toJson(Results("errors", listOf(errorDetail))))
+            }
+        }
+
+        exception<ResourceNotExistsException>(::handleError)
+        exception<ResourceExistsException>(::handleError)
+    }
+
+    private fun toError() {
+
     }
 }
