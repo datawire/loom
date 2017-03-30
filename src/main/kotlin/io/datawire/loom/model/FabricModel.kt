@@ -26,7 +26,7 @@ data class FabricModel(
         val networking: FabricNetworkingModel = FabricNetworkingModel("github.com/datawire/loom//src/terraform/network-v2"),
 
         @JsonProperty("masterType")
-        val masterType: String = "t2.nano",
+        val masterType: String = "t2.small",
 
         @JsonProperty("nodeGroups")
         val nodeGroups: List<NodeGroup>  = listOf(NodeGroup("main", 1, "t2.nano")),
