@@ -27,7 +27,7 @@ class FabricManager(private val terraform     : ExternalTool,
 
     private val tasks = ArrayBlockingQueue<FabricTask>(100)
 
-    val stateBucket = awsProvider.stateStorageBucket
+    val stateBucket = awsProvider.stateStorageBucketName
 
     init {
         backgroundTasks.execute(FabricWorker(this))
@@ -49,7 +49,7 @@ class FabricManager(private val terraform     : ExternalTool,
         val fabric = fabrics.get(fabricName) ?: throw NotFoundException(FabricNotFound(fabricName))
         val model  = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
 
-        val kops = KopsTool(kops, KopsToolContext(awsProvider.stateStorageBucket, createWorkspace(fabricName)))
+        val kops = KopsTool(kops, KopsToolContext(awsProvider.stateStorageBucketName, createWorkspace(fabricName)))
         return kops.exportKubernetesConfiguration("${fabric.name}.${model.domain}")
     }
 
@@ -68,7 +68,7 @@ class FabricManager(private val terraform     : ExternalTool,
     private fun createNetwork(workspace: Path, model: FabricModel, fabric: Fabric) {
         val tfProvider = TfProvider("aws", mapOf("region" to model.region))
         val tfBackend  = TfBackend("s3", mapOf(
-                "bucket"     to awsProvider.stateStorageBucket,
+                "bucket"     to awsProvider.stateStorageBucketName,
                 "key"        to "fabrics/${fabric.name}.tfstate",
                 "encrypt"    to "true",
                 "region"     to "us-east-1",

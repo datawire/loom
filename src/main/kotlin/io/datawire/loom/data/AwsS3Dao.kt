@@ -9,14 +9,15 @@ class AwsS3Dao<T: Any>(private val aws: AwsProvider,
                        private val daoType: KClass<T>,
                        _prefix: String) {
 
-    private val bucket = aws.stateStorageBucket
+    private val bucket = aws.stateStorageBucketName
     private val prefix = _prefix.toLowerCase()
+    private val s3     = aws.stateStorageClient
 
     private val cache = ConcurrentHashMap<String, T>()
 
     fun delete(key: String) {
         val objectKey = createObjectKey(key)
-        aws.newS3Client().deleteObject(bucket, objectKey)
+        s3.deleteObject(bucket, objectKey)
         cache.remove(objectKey)
     }
 
@@ -30,11 +31,11 @@ class AwsS3Dao<T: Any>(private val aws: AwsProvider,
 
     fun put(key: String, model: T) {
         val objectKey = createObjectKey(key)
-        aws.newS3Client().putObject(bucket, objectKey, toJson(model))
+        s3.putObject(bucket, objectKey, toJson(model))
         cache[objectKey] = model
     }
 
-    fun listItems(): Collection<String> = aws.newS3Client().listObjectsV2(bucket).objectSummaries.map { it.key }
+    fun listItems(): Collection<String> = s3.listObjectsV2(bucket).objectSummaries.map { it.key }
 
     private fun createObjectKey(key: String): String {
         return "$prefix/$key"
@@ -42,7 +43,7 @@ class AwsS3Dao<T: Any>(private val aws: AwsProvider,
 
     private fun getObjectAsStringOrNull(key: String): String? {
         return try {
-            aws.newS3Client().getObjectAsString(bucket, key)
+            s3.getObjectAsString(bucket, key)
         } catch (any: Throwable) {
             null
         }

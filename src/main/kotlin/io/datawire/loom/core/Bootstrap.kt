@@ -17,13 +17,18 @@ class Bootstrap(private val provider: AwsProvider) {
     }
 
     private fun createStateStorageBucket() {
-        val created = provider.createPrivateBucketIfNotExists(name = provider.stateStorageBucket,
+        val created = provider.createPrivateBucketIfNotExists(name = provider.stateStorageBucketName,
                                                               private = true,
                                                               versioned = true)
         if (created) {
-            logger.info("AWS S3 bucket for Loom state store created: {}", provider.stateStorageBucket)
+            logger.info("AWS S3 bucket for Loom state store created: {} ({})",
+                provider.stateStorageBucketName,
+                provider.stateStorageBucketRegion)
+
         } else {
-            logger.info("AWS S3 bucket for Loom state store existed already: {}", provider.stateStorageBucket)
+            logger.info("AWS S3 bucket for Loom state store existed already: {} ({})",
+                provider.stateStorageBucketName,
+                provider.stateStorageBucketRegion)
         }
     }
 
