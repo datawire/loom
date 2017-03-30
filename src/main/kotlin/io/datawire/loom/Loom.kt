@@ -4,14 +4,14 @@ import io.datawire.loom.aws.AwsProvider
 import io.datawire.loom.config.LoomConfig
 import io.datawire.loom.core.Bootstrap
 import io.datawire.loom.data.*
-import io.datawire.loom.exception.ExistsAlreadyException
-import io.datawire.loom.exception.FabricNotFound
-import io.datawire.loom.exception.ModelNotFound
-import io.datawire.loom.exception.NotFoundException
+import io.datawire.loom.exception.*
 import io.datawire.loom.fabric.FabricManager
-import io.datawire.loom.model.Fabric
-import io.datawire.loom.model.FabricModel
+import io.datawire.loom.internal.exception
+import io.datawire.loom.model.*
+import org.eclipse.jetty.http.HttpStatus
 import org.slf4j.LoggerFactory
+import spark.Request
+import spark.Response
 import spark.Route
 import spark.Spark.*
 import java.time.Instant
@@ -22,8 +22,8 @@ class Loom(val config: LoomConfig) {
 
     private val awsProvider = AwsProvider(config.amazon)
 
-    private val modelsDao      = AwsS3Dao<FabricModel>(awsProvider, FabricModel::class, "models")
-    private val fabricsDao     = AwsS3Dao<Fabric>(awsProvider, Fabric::class, "fabrics")
+    private val modelsDao  = AwsS3Dao<FabricModel>(awsProvider, FabricModel::class, "models")
+    private val fabricsDao = AwsS3Dao<Fabric>(awsProvider, Fabric::class, "fabrics")
 
     private val fabricManager = FabricManager(
             config.terraform, config.kops, awsProvider, modelsDao, fabricsDao)
@@ -34,19 +34,7 @@ class Loom(val config: LoomConfig) {
         port(config.port)
         ipAddress(config.host)
 
-        exception(NotFoundException::class.java) { ex, req, res ->
-            (ex as? NotFoundException)?.let {
-                res.status(404)
-                res.body(toJson(it.notFound))
-            }
-        }
-
-        exception(ExistsAlreadyException::class.java) { ex, req, res ->
-            (ex as? ExistsAlreadyException)?.let {
-                res.status(409)
-                res.body(toJson(it.existsAlready))
-            }
-        }
+        exceptionHandlers()
 
         get("/health") { req, res -> "I am healthy" }
 
@@ -62,7 +50,7 @@ class Loom(val config: LoomConfig) {
                 { req, res ->
                     val id = req.params(":id")
                     res.header("Content-Type", "application/json")
-                    modelsDao.get(req.params(":id")) ?: throw NotFoundException(ModelNotFound(id))
+                    modelsDao.get(req.params(":id")) ?: throw modelNotExists(id)
                 }), Jsonifier())
 
         delete("/models/:id") { req, res ->
@@ -91,7 +79,7 @@ class Loom(val config: LoomConfig) {
         get("/fabrics/:name", "application/json", Route(
                 { req, res ->
                     val id = req.params(":name")
-                    fabricsDao.get(req.params(":name")) ?: throw NotFoundException(FabricNotFound(id))
+                    fabricsDao.get(req.params(":name")) ?: throw fabricNotExists(id)
                 }), Jsonifier())
 
         get("/fabrics/:name/cluster/config") { req, res ->
@@ -108,11 +96,29 @@ class Loom(val config: LoomConfig) {
 
         delete("/fabrics/:name/cluster") { req, res ->
             val fabricName = req.params(":name")
-            val fabric = fabricsDao.get(fabricName) ?: throw NotFoundException(FabricNotFound(fabricName))
+            val fabric = fabricsDao.get(fabricName) ?: throw fabricNotExists(fabricName)
             fabricManager.deleteCluster(fabric)
 
             res.status(204)
             ""
         }
+    }
+
+    private fun exceptionHandlers() {
+        fun buildResponse(ex: Exception, req: Request, res: Response) {
+            val temp = ex as? LoomException ?: LoomException(cause = ex)
+            val (httpStatus, errors) = temp.getStatusCodeAndErrorDetails()
+            res.status(httpStatus)
+            res.header("Content-Type", "application/json")
+            res.body(toJson(errors))
+        }
+
+        notFound { req, res ->
+            res.status(404)
+            res.body()
+        }
+
+        exception<LoomException>(::buildResponse)
+        exception<Exception>(::buildResponse)
     }
 }

@@ -42,7 +42,7 @@ class KopsTool(private val tool: ExternalTool,
      */
     fun exportKubernetesConfiguration(clusterName: String): String {
         val execCtx = prepareExecutionContext()
-        val execCmd = kops("create", "export", "kubecfg", "--name=$clusterName")
+        val execCmd = kops("export", "kubecfg", "--name=$clusterName")
         val result  = ExternalToolExecutor(execCmd, execCtx).execute()
         return when(result.exitValue) {
             0    -> Files.newBufferedReader(context.workspace.resolve(".kube/config")).readText()

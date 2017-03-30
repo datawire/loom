@@ -8,8 +8,7 @@ import io.datawire.loom.exception.*
 import io.datawire.loom.fabric.kops.KopsTool
 import io.datawire.loom.fabric.kops.KopsToolContext
 import io.datawire.loom.fabric.terraform.*
-import io.datawire.loom.model.Fabric
-import io.datawire.loom.model.FabricModel
+import io.datawire.loom.model.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -42,19 +41,19 @@ class FabricManager(private val terraform     : ExternalTool,
     }
 
     private fun validate(model: FabricModel, fabric: Fabric) {
-        fabrics.get(fabric.name)?.let { throw ExistsAlreadyException(FabricExists(it.name)) }
+        fabrics.get(fabric.name)?.let { throw fabricExists(fabric.name) }
     }
 
     fun getClusterConfig(fabricName: String): String {
-        val fabric = fabrics.get(fabricName) ?: throw NotFoundException(FabricNotFound(fabricName))
-        val model  = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
+        val fabric = fabrics.get(fabricName)        ?: throw fabricNotExists(fabricName)
+        val model  = fabricModels.get(fabric.model) ?: throw modelNotExists(fabric.model)
 
         val kops = KopsTool(kops, KopsToolContext(awsProvider.stateStorageBucketName, createWorkspace(fabricName)))
         return kops.exportKubernetesConfiguration("${fabric.name}.${model.domain}")
     }
 
     fun create(fabric: Fabric): Fabric {
-        val model = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
+        val model = fabricModels.get(fabric.model) ?: throw modelNotExists(fabric.model)
         validate(model, fabric)
 
         val resolvedNameFabric = fabric.copy(clusterName = "${fabric.name}.${model.domain}")
@@ -115,7 +114,7 @@ class FabricManager(private val terraform     : ExternalTool,
     }
 
     fun deleteCluster(fabric: Fabric) {
-        val model = fabricModels.get(fabric.model) ?: throw NotFoundException(ModelNotFound(fabric.model))
+        val model = fabricModels.get(fabric.model) ?: throw modelNotExists(fabric.model)
         val fabCtx = FabricTaskContext(model, fabric, this, createWorkspace(fabric.name), terraform, kops)
         val task = DeleteCluster(fabCtx)
         putTask(task)

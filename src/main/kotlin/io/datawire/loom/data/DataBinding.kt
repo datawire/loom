@@ -1,10 +1,13 @@
 package io.datawire.loom.data
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import spark.ResponseTransformer
 import java.nio.file.Files
@@ -37,16 +40,39 @@ fun toYaml(path: Path, any: Any?) = YAML_MAPPER.writeValue(path.toFile(), any)
 fun <T: Any> fromJson(data: String, clazz: KClass<T>): T = JSON_MAPPER.readValue(data, clazz.java)
 fun <T: Any> fromYaml(data: String, clazz: KClass<T>): T = YAML_MAPPER.readValue(data, clazz.java)
 
+/**
+ * Bind arbitrary JSON to String-keyed map.
+ *
+ * @param json the input JSON to use for binding.
+ */
+fun fromJsonToMap(json: String) = fromJson<Map<String, Any?>>(json)
+
+/**
+ * Bind an arbitrary String-keyed map into an actual instance of [T]. Extremely useful when you had to do validation
+ * received data before binding could occur, for example, to ensure no null values were present.
+ *
+ * @param map the input map to use for binding.
+ */
+inline fun <reified T: Any> fromMap(map: Map<String, Any?>): T = JSON_MAPPER.convertValue<T>(map)
+
 inline fun <reified T: Any> fromJson(data: String): T = fromJson(data, T::class)
 inline fun <reified T: Any> fromYaml(data: String): T = fromYaml(data, T::class)
 
 inline fun <reified T: Any> fromJson(path: Path): T = fromJson(Files.newBufferedReader(path).readText())
 inline fun <reified T: Any> fromYaml(path: Path): T = fromYaml(Files.newBufferedReader(path).readText())
 
+/**
+ * Transform an object into JSON. Implements the [ResponseTransformer] contract for Sparkjava framework.
+ *
+ * @property pretty whether the JSON should be "pretty" printed (true) or not (false).
+ */
 class Jsonifier(private val pretty: Boolean = true) : ResponseTransformer {
     override fun render(model: Any?) = toJson(model, pretty)
 }
 
+/**
+ * Transform an object into YAML. Implements the [ResponseTransformer] contract for Sparkjava framework.
+ */
 class Yamlifier() : ResponseTransformer {
     override fun render(model: Any?) = toYaml(model)
 }
