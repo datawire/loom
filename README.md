@@ -102,7 +102,7 @@ Talking to Kubernetes still requires credentials and you need Loom to give them 
 ```bash
 mkdir ~/.kube/config.d
 curl --output ~/.kube/config.d/myfirstcluster \
-    localhost:7000/fabrics/myfirstfabric/cluster/config
+    localhost:7000/fabrics/myfirstcluster/cluster/config
 ```
 
 ### 5. Talking to Kubernetes
@@ -110,7 +110,7 @@ curl --output ~/.kube/config.d/myfirstcluster \
 Loom does not have a fabric status API right now, but if you wait about 3 to 5 minutes (go get a coffee!) after creating the cluster and getting your credentials then you should be able to do this:
 
 ```bash
-kubectl cluster-info --kubeconfig={$HOME}/.kube/config.d/myfirstcluster
+kubectl cluster-info --kubeconfig=${HOME}/.kube/config.d/myfirstcluster
 Kubernetes master is running at <Some-URL>
 KubeDNS is running at <Some-URL>
 ```
