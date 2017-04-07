@@ -1,8 +1,8 @@
-package io.datawire.loom.fabric.state
+package io.datawire.loom.fabric.state.api
 
 import org.slf4j.LoggerFactory
 
-object StateLogger : StateAction {
+object StateLogger : StateAction<State<*>> {
 
   private val logger = LoggerFactory.getLogger("state-logger")
 

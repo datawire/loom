@@ -1,4 +1,4 @@
-package io.datawire.loom.fabric.state
+package io.datawire.loom.fabric.state.api
 
 
 data class StateMachine<in T>(private val name         : String,
