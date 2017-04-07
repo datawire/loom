@@ -28,6 +28,9 @@ data class FabricModel(
         @JsonProperty("masterType")
         val masterType: String = "t2.small",
 
+        @JsonProperty("masterCount")
+        val masterCount: Int?,
+
         @JsonProperty("nodeGroups")
         val nodeGroups: List<NodeGroup>  = listOf(NodeGroup("main", 1, "t2.nano")),
 

@@ -11,7 +11,7 @@ import java.nio.file.Path
  * @property networkCidr the CIDR block of the network.
  * @property availabilityZones the availability zones to spread kubernetes masters and workers across.
  * @property masterType instance size/type for the Kubernetes master nodes.
- * @property masterCount number of Kubernetes master nodes.
+ * @property masterCount number of Kubernetes master nodes. (default: 1 per availability zone).
  * @property nodeType instance size/type for the Kubernetes worker nodes.
  * @property labels information labels to attach to underlying compute infrastructure consumed by the Kubernetes cluster.
  */
@@ -23,7 +23,7 @@ data class CreateClusterParams(
         val networkCidr       : String,
         val availabilityZones : List<String>,
         val masterType        : String,
-        val masterCount       : Int? = null,
+        val masterCount       : Int?,
         val nodeType          : String,
         val nodeCount         : Int,
         val sshPublicKey      : Path,
@@ -50,7 +50,9 @@ data class CreateClusterParams(
             res += "--cloud-labels=${labels.entries.joinToString(",", prefix = "\"", postfix = "\"")}"
         }
 
-        masterCount?.let { res += "--master-count=$it" }
+        masterCount?.let {
+            res += "--master-count=$it"
+        }
 
         return res
     }

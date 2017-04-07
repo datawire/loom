@@ -30,12 +30,14 @@ class CreateCluster(ctx: FabricTaskContext) : FabricTask(ctx) {
                 networkCidr       = fabric.networkCidr!!,
                 availabilityZones = fabric.availabilityZones,
                 masterType        = model.masterType,
-                masterCount       = null,
+                masterCount       = model.masterCount,
                 nodeType          = model.nodeGroups[0].nodeType,
                 nodeCount         = model.nodeGroups[0].nodeCount,
                 sshPublicKey      = key,
                 labels            = emptyMap()
         )
+
+        model.masterCount?.let { params }
 
         val kops = KopsTool(ctx.kops, KopsToolContext(ctx.manager.stateBucket, ctx.workspace))
         val success = kops.createCluster(params)
