@@ -8,12 +8,17 @@ import io.datawire.loom.exception.*
 import io.datawire.loom.fabric.FabricManager
 import io.datawire.loom.internal.exception
 import io.datawire.loom.model.*
+import io.datawire.loom.v2.FabricController
+import io.datawire.loom.v2.KubernetesClusterService
+import io.datawire.loom.v2.kops.Kops
 import org.eclipse.jetty.http.HttpStatus
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
 import spark.Route
 import spark.Spark.*
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.Instant
 
 class Loom(val config: LoomConfig) {
@@ -69,6 +74,21 @@ class Loom(val config: LoomConfig) {
     }
 
     private fun fabricApi() {
+        val kopsExec = config.kops.executable
+        val fabricController = FabricController(
+            fabricsDao,
+            KubernetesClusterService(
+                kops = { cluster ->
+                    val fabric = cluster.substring(0..cluster.indexOf(".") - 1)
+                    Kops(kopsExec,
+                        awsProvider.stateStorageBucketName,
+                        Files.createDirectories(Paths.get("/tmp/fabric-$fabric")
+                        )
+                    )
+                }
+            )
+        )
+
         post("/fabrics") { req, res ->
             val fabric = fromJson<Fabric>(req.body())
             fabricManager.create(fabric)
@@ -81,6 +101,12 @@ class Loom(val config: LoomConfig) {
                     val id = req.params(":name")
                     fabricsDao.get(req.params(":name")) ?: throw fabricNotExists(id)
                 }), Jsonifier())
+
+        get("/fabrics/:name/cluster", "application/json", Route(
+            { req, res ->
+                res.header("Content-Type", "application/json")
+                fabricController.getCluster(req.params(":name"))
+            }), Jsonifier())
 
         get("/fabrics/:name/cluster/config") { req, res ->
             res.header("Content-Type", "application/yaml")
