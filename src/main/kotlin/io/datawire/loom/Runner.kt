@@ -1,8 +1,8 @@
 package io.datawire.loom
 
 
-import io.datawire.loom.config.LoomConfig
-import io.datawire.loom.data.fromYaml
+import io.datawire.loom.proto.config.LoomConfig
+import io.datawire.loom.proto.data.fromYaml
 import java.io.FileInputStream
 import java.nio.file.Paths
 import java.util.*
