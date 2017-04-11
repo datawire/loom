@@ -24,6 +24,8 @@ This is a simple demonstration of Loom. For more detailed install instructions f
 
 ### 1. Run Loom
 
+**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:alpha` frequently to ensure the latest image is running.
+
 Loom is packaged as a [Docker](https://docker.com) image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
 
 - An AWS S3 bucket where Loom can store app state and config. The name will be `loom-state-${AWS_ACCOUNT_ID}`.
@@ -33,11 +35,15 @@ Depending on how you store your AWS credentials and config there are two common 
 
 **Preferred: Use AWS credentials and config in `$HOME/.aws` directory**
 
-`docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha`
+```bash
+docker pull datawire/loom:alpha
+docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha
+```
 
 **Alternative: Set AWS environment variables**
 
 ```bash
+docker pull datawire/loom:alpha
 docker run --rm -it \
   -p 7000:7000 \
   -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
@@ -91,7 +97,7 @@ Let's start a fabric! Choose a name for your fabric, for example: `philsfab` or 
 ```bash
 curl -v -X POST \
      -H "Content-Type: application/json" \
-     -d '{"name": "myfirstcluster", "model": "simple-v1"}' \
+     -d '{"name": "myfirstfabric", "model": "simple-v1"}' \
      localhost:7000/fabrics
 ```
 
@@ -101,16 +107,29 @@ Talking to Kubernetes still requires credentials and you need Loom to give them 
 
 ```bash
 mkdir ~/.kube/config.d
-curl --output ~/.kube/config.d/myfirstcluster \
+curl --output ~/.kube/config.d/myfirstcluster.cluster \
     localhost:7000/fabrics/myfirstcluster/cluster/config
+```
+
+### 5. Check if Cluster is Available
+
+Getting the status of a cluster is easy:
+
+```bash
+curl localhost:7000/fabrics/myfirstfabric/cluster
+
+{
+  "name": "myfirstcluster.example.org",
+  "available": true
+}
 ```
 
 ### 5. Talking to Kubernetes
 
-Loom does not have a fabric status API right now, but if you wait about 3 to 5 minutes (go get a coffee!) after creating the cluster and getting your credentials then you should be able to do this:
+Once the cluster is available you can use `kubectl` to use Kubernetes:
 
 ```bash
-kubectl cluster-info --kubeconfig=${HOME}/.kube/config.d/myfirstcluster
+kubectl cluster-info --kubeconfig=${HOME}/.kube/config.d/myfirstfabric.cluster
 Kubernetes master is running at <Some-URL>
 KubeDNS is running at <Some-URL>
 ```
