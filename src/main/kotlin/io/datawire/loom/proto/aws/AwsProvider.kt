@@ -57,7 +57,8 @@ class AwsProvider(private val config: AwsConfig) {
     val providers = mutableListOf(
         ProfileCredentialsProvider(),
         EnvironmentVariableCredentialsProvider(),
-        InstanceProfileCredentialsProvider.createAsyncRefreshingProvider(false))
+        InstanceProfileCredentialsProvider.getInstance()
+    )
 
     if (config.accessKey != null && config.secretKey != null) {
       providers += AWSStaticCredentialsProvider(BasicAWSCredentials(config.accessKey, config.secretKey))
