@@ -42,14 +42,7 @@ class AwsS3Dao<T: Any>(
             .withBucketName(bucket)
             .withPrefix(prefix)
 
-        return s3.listObjectsV2(list).objectSummaries.map {
-            val strippedPath = it.key.replace(prefix ?: "", "")
-            if (strippedPath.contains(".")) {
-                strippedPath.substring(0, strippedPath.lastIndexOf('.'))
-            } else {
-                strippedPath
-            }
-        }.toSet().toList()
+        return s3.listObjectsV2(list).objectSummaries.map { it.key.replace(prefix ?: "", "") }.filterNot { it.endsWith(".tfstate") }
     }
 
     private fun createObjectKey(key: String): String {
