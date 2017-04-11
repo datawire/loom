@@ -1,6 +1,7 @@
 package io.datawire.loom.v1
 
 
+import io.datawire.loom.proto.aws.symlinkAwsConfig
 import io.datawire.loom.proto.cluster.ClusterContext
 import io.datawire.loom.proto.cluster.ClusterContextLoader
 import io.datawire.loom.proto.cluster.KubernetesClients
@@ -11,6 +12,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException
 import org.slf4j.LoggerFactory
 import java.net.SocketTimeoutException
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 

@@ -1,5 +1,6 @@
 package io.datawire.loom.proto.fabric.terraform
 
+import io.datawire.loom.proto.aws.symlinkAwsConfig
 import io.datawire.loom.proto.core.ExternalTool
 import io.datawire.loom.proto.core.ExternalToolExecutor
 import io.datawire.loom.proto.core.ExternalToolExecutorContext
@@ -87,6 +88,7 @@ class TerraformTool(
     private fun terraform(vararg args: String) = (arrayOf(tool.executable) + args).toMutableList()
 
     private fun prepareExecutionContext(): ExternalToolExecutorContext {
+        symlinkAwsConfig(workspace.resolve(".aws"))
         return ExternalToolExecutorContext(workspace)
     }
 }

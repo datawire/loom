@@ -1,5 +1,6 @@
 package io.datawire.loom.v1.kops
 
+import io.datawire.loom.proto.aws.symlinkAwsConfig
 import io.datawire.loom.proto.core.ExternalToolExecutor
 import io.datawire.loom.proto.core.ExternalToolExecutorContext
 import io.datawire.loom.v1.ClusterConfig
@@ -109,6 +110,12 @@ class Kops(
     System.getenv("AWS_SECRET_ACCESS_KEY")?.let { variables += Pair("AWS_SECRET_ACCESS_KEY", it) }
     System.getenv("AWS_DEFAULT_REGION")?.let    { variables += Pair("AWS_DEFAULT_REGION", it) }
     System.getenv("AWS_REGION")?.let            { variables += Pair("AWS_REGION", it) }
+
+    try {
+      symlinkAwsConfig(workspace.resolve(".aws"))
+    } catch (ex: Throwable) {
+      ex.printStackTrace()
+    }
 
     return ExternalToolExecutorContext(workspace, variables)
   }
