@@ -1,0 +1,41 @@
+---
+layout: landing
+title: Loom
+permalink: /
+---
+
+<header class="hero">
+  <div class="logo">
+  <img src="{{site.baseurl}}/images/logo.png" style="width: 100px;">
+  <h4>&nbsp; Loom: Self-service provisioning for microservices in Kubernetes/AWS</h4>
+  </div>
+</header>
+
+<div class="container">
+  <p>Do you want your development teams to be able to quickly create microservices, without depending on operations? <b>Loom</b> lets your developers provision the cloud resources they need, automatically, without manual work by ops.</p>
+
+  <p>Developers use Loom's RESTful API to request specific resource types. Ops engineers configure the Loom back-end to map resource requests to organization-specific configurations.</p> 
+
+  <p style="text-align: center;">Loom is sponsored by Project Blackbird, helping you <a href="https://datawire.io">deploy microservices on Kubernetes in AWS</a> <img src="{{site.baseurl}}/images/blackbird.png" style="width: 4em; vertical-align: middle; align: right;"></p>
+</div>
+
+<div class="container">
+  {% for cat in site.category-list %}
+  <div class="four wide columns  basic vertical menu">
+    <div class="items">
+        <div class="icon item header">
+            <i class="fa fa-{{site.category-icons[forloop.index0]}}"></i>{{ cat | replace: "-", " " }}
+        </div>
+        {% assign pages = site.pages | sort:"weight"  %}
+
+        {% for p in pages %}
+            {% for pc in p.categories %}
+              {% if pc == cat %}
+        <a class="item" href="{{site.baseurl}}{{ p.url }}">{{ p.title }}</a>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+    </div>
+    </div>
+    {% endfor %}
+</div>
