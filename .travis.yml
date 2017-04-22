@@ -18,14 +18,13 @@ env:
   global:
     - DOCKER_REPO=datawire/loom
     - COMMIT=${TRAVIS_COMMIT::8}
+    - PACKER_VERSION=1.0.0
 
 before_script:
-  - pip install -Ur ci/requirements.txt
+  - bash ci/travis_before_script.sh
 
 script:
-  - set -e
-  - ./gradlew clean test shadowJar
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && ci/dockerize.py --push
+  - bash ci/travis_script.sh
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
