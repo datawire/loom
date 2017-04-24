@@ -111,12 +111,7 @@ class Kops(
     System.getenv("AWS_DEFAULT_REGION")?.let    { variables += Pair("AWS_DEFAULT_REGION", it) }
     System.getenv("AWS_REGION")?.let            { variables += Pair("AWS_REGION", it) }
 
-    try {
-      symlinkAwsConfig(workspace.resolve(".aws"))
-    } catch (ex: Throwable) {
-      ex.printStackTrace()
-    }
-
+    symlinkAwsConfig(workspace.resolve(".aws"))
     return ExternalToolExecutorContext(workspace, variables)
   }
 }
