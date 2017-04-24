@@ -16,6 +16,7 @@ import io.datawire.loom.proto.model.Fabric
 import io.datawire.loom.proto.model.FabricModel
 import io.datawire.loom.v1.FabricController
 import io.datawire.loom.v1.KopsKubernetesClusterService
+import io.datawire.loom.v1.auth.SingleUserAuthenticator
 import io.datawire.loom.v1.kops.Kops
 import org.slf4j.LoggerFactory
 import spark.Request
@@ -43,6 +44,10 @@ class Loom(val config: LoomConfig) {
 
     port(config.port)
     ipAddress(config.host)
+
+    if (System.getProperty("loom.auth.required", "false") == "true") {
+      before("/*", SingleUserAuthenticator("admin", System.getProperty("loom.auth.admin-password", "admin")))
+    }
 
     exceptionHandlers()
 
