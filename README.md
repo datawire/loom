@@ -8,6 +8,10 @@ Loom enables operations engineers to provide a self-serve Kubernetes provisionin
 
 Thus we have Loom! Ops engineers install Loom inside of their AWS account as a persistent running server and developers use the simple HTTP API to self provision their own Kubernetes fabrics. Loom handles all the nitty gritty details of network creation, cluster setup and management.
 
+# Getting started
+
+Visit http://loom.run for documentation.
+
 ## What is a Kubernetes "Fabric"?
 
 When people talk about Kubernetes they usually talk purely in terms of the Kubernetes cluster where containers are scheduled and run. A "fabric" is an abstract concept that describes the entire ecosystem surrounding a Kubernetes cluster, for example, a "Kubernetes" and "AWS" fabric includes not only the Kubernetes cluster, but one or more VPC and within that VPC you may schedule non-Kubernetes resources to run such as RDS databases or EC2 instances. The point of calling it a "fabric" is that it's all nicely woven together for you so that, for example, containers running in the Kubernetes cluster can speak to the RDS databases without having to think about networking.
