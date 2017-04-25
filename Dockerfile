@@ -6,8 +6,8 @@ LABEL PROJECT_REPO_URL         = "git@github.com:datawire/deployd.git" \
       VENDOR                   = "Datawire, Inc." \
       VENDOR_URL               = "https://datawire.io/"
 
-ENV TERRAFORM_VERSION "0.9.1"
-ENV TERRAFORM_SHA256  "b3b18a719258dcc02b7b972eedf417be0b497e4129063711bca82877dbe65553"
+ENV TERRAFORM_VERSION "0.9.3"
+ENV TERRAFORM_SHA256  "f34b96f7b7edaf8c4dc65f6164ba0b8f21195f5cbe5b7288ad994aa9794bb607"
 ENV KOPS_VERSION      "1.5.3"
 
 ARG IMPL_VERSION
