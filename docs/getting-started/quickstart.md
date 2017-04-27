@@ -96,8 +96,8 @@ Talking to Kubernetes still requires credentials and you need Loom to give them 
 
 ```bash
 mkdir ~/.kube/config.d
-curl --output ~/.kube/config.d/myfirstcluster.cluster \
-    localhost:7000/fabrics/myfirstcluster/cluster/config
+curl --output ~/.kube/config.d/myfirstfabric.cluster \
+    localhost:7000/fabrics/myfirstfabric/cluster/config
 ```
 
 ### 5. Check if Cluster is Available
@@ -108,7 +108,7 @@ Getting the status of a cluster is easy:
 curl localhost:7000/fabrics/myfirstfabric/cluster
 
 {
-  "name": "myfirstcluster.example.org",
+  "name": "myfirstfabric.example.org",
   "available": true
 }
 ```
