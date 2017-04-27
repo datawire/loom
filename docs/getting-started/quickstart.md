@@ -13,7 +13,7 @@ categories: getting-started
 
 ### 1. Run Loom
 
-**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:alpha` frequently to ensure the latest image is running.
+**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:0.1.0` frequently to ensure the latest image is running.
 
 Loom is packaged as a [Docker](https://docker.com) image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
 
@@ -25,14 +25,14 @@ Depending on how you store your AWS credentials and config there are two common 
 **Preferred: Use AWS credentials and config in `$HOME/.aws` directory**
 
 ```bash
-docker pull datawire/loom:alpha
+docker pull datawire/loom:0.1.0
 docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha
 ```
 
 **Alternative: Set AWS environment variables**
 
 ```bash
-docker pull datawire/loom:alpha
+docker pull datawire/loom:0.1.0
 docker run --rm -it \
   -p 7000:7000 \
   -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
@@ -122,6 +122,21 @@ kubectl cluster-info --kubeconfig=${HOME}/.kube/config.d/myfirstfabric.cluster
 Kubernetes master is running at <Some-URL>
 KubeDNS is running at <Some-URL>
 ```
+
+Alternatively instead of specifying `--kubeconfig=...` over and over you can set the `KUBECONFIG=` environment variable, for example:
+
+```bash
+EXPORT KUBECONFIG=${HOME}/.kube/config.d/myfirstfabric.cluster
+kubectl cluster-info
+Kubernetes master is running at <Some-URL>
+KubeDNS is running at <Some-URL>
+```
+
+### 6. Deleting Your Fabric
+
+If you want to tear your fabric down it's as simple as running:
+
+`curl -X DELETE localhost:7000/fabrics/myfirstfabric`
 
 Cluster up and running! Now you can use `kubectl` to actually do work with Kubernetes.
 
