@@ -9,6 +9,7 @@ import io.datawire.loom.proto.data.fromJson
 import io.datawire.loom.proto.data.toJson
 import io.datawire.loom.proto.exception.LoomException
 import io.datawire.loom.proto.exception.fabricNotExists
+import io.datawire.loom.proto.exception.modelExists
 import io.datawire.loom.proto.exception.modelNotExists
 import io.datawire.loom.proto.fabric.FabricManager
 import io.datawire.loom.proto.internal.exception
@@ -78,7 +79,11 @@ class Loom(val config: LoomConfig) {
 
     post("/models") { req, res ->
       val model = fromJson<FabricModel>(req.body())
-      modelsDao.put(model.id, model.copy(creationTime = Instant.now()))
+      if (modelsDao.get(model.id) == null) {
+        modelsDao.put(model.id, model.copy(creationTime = Instant.now()))
+      } else {
+        throw modelExists(model.id)
+      }
       res.status(204)
     }
 

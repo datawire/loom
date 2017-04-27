@@ -32,7 +32,7 @@ data class FabricModel(
         val masterCount: Int?,
 
         @JsonProperty("nodeGroups")
-        val nodeGroups: List<NodeGroup>  = listOf(NodeGroup("main", 1, "t2.nano")),
+        val nodeGroups: List<NodeGroup>  = listOf(NodeGroup("main", 1, "t2.small")),
 
         @JsonProperty("sshPublicKey")
         val sshPublicKey: String) {
