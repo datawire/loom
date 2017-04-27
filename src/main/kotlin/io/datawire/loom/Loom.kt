@@ -162,6 +162,7 @@ class Loom(val config: LoomConfig) {
 
   private fun exceptionHandlers() {
     fun buildResponse(ex: Exception, req: Request, res: Response) {
+      logger.error("Error processing", ex)
       val temp = ex as? LoomException ?: LoomException(cause = ex)
       val (httpStatus, errors) = temp.getStatusCodeAndErrorDetails()
       res.status(httpStatus)
@@ -169,7 +170,7 @@ class Loom(val config: LoomConfig) {
       res.body(toJson(errors))
     }
 
-    notFound { req, res ->
+    notFound { _, res ->
       res.status(404)
       res.body()
     }
