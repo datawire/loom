@@ -132,12 +132,12 @@ Kubernetes master is running at <Some-URL>
 KubeDNS is running at <Some-URL>
 ```
 
+Cluster up and running! Now you can use `kubectl` to actually do work with Kubernetes.
+
+**NOTE:** The `kubectl` command does not *yet* understand the `config.d` idiom, but there is a Pull Request moving along to enable this functionality in `kubectl`. The idea is that `kubectl` would load all the config files in this directory before use. Until then we need to simulate usage with the `--kubeconfig=<path>` option.
+
 ### 6. Deleting Your Fabric
 
 If you want to tear your fabric down it's as simple as running:
 
 `curl -X DELETE localhost:7000/fabrics/myfirstfabric`
-
-Cluster up and running! Now you can use `kubectl` to actually do work with Kubernetes.
-
-**NOTE:** The `kubectl` command does not *yet* understand the `config.d` idiom, but there is a Pull Request moving along to enable this functionality in `kubectl`. The idea is that `kubectl` would load all the config files in this directory before use. Until then we need to simulate usage with the `--kubeconfig=<path>` option.
