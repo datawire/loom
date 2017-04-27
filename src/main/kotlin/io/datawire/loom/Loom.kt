@@ -135,7 +135,12 @@ class Loom(val config: LoomConfig) {
 
     delete("/fabrics/:name") { req, res ->
       val fabricName = req.params(":name")
-      fabricsDao.delete(fabricName)
+
+      fabricsDao.get(fabricName)?.let {
+        fabricManager.deleteCluster(it)
+        fabricsDao.delete(fabricName)
+      }
+
       res.status(204)
       ""
     }

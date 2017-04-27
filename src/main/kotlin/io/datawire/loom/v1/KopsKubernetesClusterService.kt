@@ -1,18 +1,15 @@
 package io.datawire.loom.v1
 
 
-import io.datawire.loom.proto.aws.symlinkAwsConfig
 import io.datawire.loom.proto.cluster.ClusterContext
 import io.datawire.loom.proto.cluster.ClusterContextLoader
 import io.datawire.loom.proto.cluster.KubernetesClients
 import io.datawire.loom.proto.data.YAML_MAPPER
-import io.datawire.loom.proto.exception.fabricNotExists
 import io.datawire.loom.v1.kops.Kops
 import io.fabric8.kubernetes.client.KubernetesClientException
 import org.slf4j.LoggerFactory
 import java.net.SocketTimeoutException
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 
