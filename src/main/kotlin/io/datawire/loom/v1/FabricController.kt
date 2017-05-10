@@ -1,5 +1,6 @@
 package io.datawire.loom.v1
 
+import io.datawire.loom.dev.core.kubernetes.KubernetesClusterService
 import io.datawire.loom.proto.data.AwsS3Dao
 import io.datawire.loom.proto.exception.notFound
 import io.datawire.loom.proto.model.ClusterReference

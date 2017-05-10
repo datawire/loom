@@ -28,14 +28,13 @@ if (!JavaVersion.current().java8Compatible) {
 group   = 'io.datawire.loom'
 version = new BuildInfo().resolveVersion()
 
-mainClassName = "io.datawire.loom.RunnerKt"
+mainClassName = "io.datawire.loom.dev.LoomKt"
 
 ext {
-  awsSdkVersion      = '1.11.105'
+  awsSdkVersion      = '1.11.126'
   jacksonVersion     = '2.9.0.pr2'
   junitVersion       = '4.12'
   logbackVersion     = '1.1.7'
-  vertxVersion       = '3.4.1'
 }
 
 apply plugin: 'kotlin'
@@ -56,10 +55,9 @@ dependencies {
   compile group: 'com.amazonaws', name: 'aws-java-sdk-core',     version: awsSdkVersion
   compile group: 'com.amazonaws', name: 'aws-java-sdk-s3',       version: awsSdkVersion
   compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
-  compile group: 'com.amazonaws', name: 'aws-java-sdk-iam', version: awsSdkVersion
-
-  compile group: 'javax.el',          name: 'javax.el-api', version: '2.2.4'
-  compile group: 'org.glassfish.web', name: 'el-impl',      version: '2.2'
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-iam',      version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-route53',  version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-sts',      version: awsSdkVersion
 
   compile group: 'com.fasterxml.jackson.core',       name: 'jackson-annotations',            version: jacksonVersion
   compile group: 'com.fasterxml.jackson.module',     name: 'jackson-module-kotlin',          version: jacksonVersion
@@ -73,8 +71,6 @@ dependencies {
   compile group: 'com.sparkjava', name: 'spark-core', version: '2.5.5'
 
   compile group: 'org.apache.commons',   name: 'commons-lang3', version: '3.5'
-
-  compile group: 'org.hibernate', name: 'hibernate-validator', version: '5.4.0.Final'
 
   compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlinVersion
   compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion

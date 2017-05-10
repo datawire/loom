@@ -2,7 +2,8 @@ package io.datawire.loom
 
 import io.datawire.loom.proto.aws.AwsProvider
 import io.datawire.loom.proto.config.LoomConfig
-import io.datawire.loom.proto.core.Bootstrap
+import io.datawire.loom.dev.aws.AwsBootstrap
+import io.datawire.loom.dev.aws.createAwsCloud
 import io.datawire.loom.proto.data.AwsS3Dao
 import io.datawire.loom.proto.data.Jsonifier
 import io.datawire.loom.proto.data.fromJson
@@ -17,7 +18,7 @@ import io.datawire.loom.proto.model.Fabric
 import io.datawire.loom.proto.model.FabricModel
 import io.datawire.loom.v1.FabricController
 import io.datawire.loom.v1.KopsKubernetesClusterService
-import io.datawire.loom.v1.auth.SingleUserAuthenticator
+import io.datawire.loom.dev.auth.SingleUserAuthenticator
 import io.datawire.loom.v1.kops.Kops
 import org.slf4j.LoggerFactory
 import spark.Request
@@ -41,7 +42,7 @@ class Loom(val config: LoomConfig) {
       config.terraform, config.kops, awsProvider, modelsDao, fabricsDao)
 
   fun run() {
-    Bootstrap(awsProvider).bootstrap()
+    AwsBootstrap(createAwsCloud(config.amazon)).bootstrap()
 
     port(config.port)
     ipAddress(config.host)
@@ -115,6 +116,12 @@ class Loom(val config: LoomConfig) {
 
       res.status(204)
     }
+
+    post("/fabrics/resources", "application/json",
+        Route({ req, res ->
+
+
+        }), Jsonifier())
 
     get("/fabrics", "application/json", Route(
         { _, _ ->

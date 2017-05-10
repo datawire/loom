@@ -1,6 +1,6 @@
 package io.datawire.loom.proto.config
 
-import io.datawire.loom.proto.aws.AwsConfig
+import io.datawire.loom.dev.aws.AwsConfig
 import io.datawire.loom.proto.core.ExternalTool
 
 

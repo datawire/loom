@@ -1,6 +1,4 @@
 # --- Loom ---
-/.loom/
-workspace
 
 # --- Java ---
 build
@@ -11,7 +9,6 @@ target
 
 # --- IntelliJ ---
 .idea
-*.iml
 
 # --- OS Junk ---
 .directory
@@ -19,9 +16,6 @@ target
 
 # --- Gradle ---
 .gradle
-
-# --- Vert.x ---
-.vertx
 
 # --- Python ---
 *.pyc

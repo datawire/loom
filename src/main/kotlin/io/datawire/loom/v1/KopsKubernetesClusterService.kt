@@ -1,9 +1,10 @@
 package io.datawire.loom.v1
 
 
-import io.datawire.loom.proto.cluster.ClusterContext
-import io.datawire.loom.proto.cluster.ClusterContextLoader
-import io.datawire.loom.proto.cluster.KubernetesClients
+import io.datawire.loom.dev.core.kubernetes.KubernetesClusterService
+import io.datawire.loom.dev.core.cluster.ClusterContext
+import io.datawire.loom.dev.core.cluster.ClusterContextLoader
+import io.datawire.loom.dev.core.cluster.KubernetesClients
 import io.datawire.loom.proto.data.YAML_MAPPER
 import io.datawire.loom.v1.kops.Kops
 import io.fabric8.kubernetes.client.KubernetesClientException

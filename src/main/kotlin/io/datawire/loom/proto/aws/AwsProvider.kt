@@ -13,6 +13,7 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientB
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.*
+import io.datawire.loom.dev.aws.AwsConfig
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
