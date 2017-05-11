@@ -88,7 +88,7 @@ def main(args):
     version = gradle('--quiet version')
     is_tag = os.getenv('TRAVIS_TAG') not in ['', None]
     is_pull_request = os.getenv('TRAVIS_PULL_REQUEST', 'false') != 'false'
-    pull_request_number = os.getenv('TRAVIS_PULL_REQUEST_NUMBER')
+    pull_request_number = os.getenv('TRAVIS_PULL_REQUEST')
     build_number = os.getenv('TRAVIS_BUILD_NUMBER')
 
     if is_pull_request:
