@@ -13,7 +13,7 @@ categories: getting-started
 
 ### 1. Run Loom
 
-**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:0.1.0` frequently to ensure the latest image is running.
+**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:0.1.1` frequently to ensure the latest image is running.
 
 Loom is packaged as a [Docker](https://docker.com) image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
 
@@ -25,14 +25,14 @@ Depending on how you store your AWS credentials and config there are two common 
 **Preferred: Use AWS credentials and config in `$HOME/.aws` directory**
 
 ```bash
-docker pull datawire/loom:0.1.0
-docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha
+docker pull datawire/loom:0.1.1
+docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:0.1.1
 ```
 
 **Alternative: Set AWS environment variables**
 
 ```bash
-docker pull datawire/loom:0.1.0
+docker pull datawire/loom:0.1.1
 docker run --rm -it \
   -p 7000:7000 \
   -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
