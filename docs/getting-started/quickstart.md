@@ -13,7 +13,7 @@ categories: getting-started
 
 ### 1. Run Loom
 
-**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:0.1.0` frequently to ensure the latest image is running.
+**NOTE**: Loom is Alpha quality software. It is strongly recommended you do a `docker pull datawire/loom:0.1.1` frequently to ensure the latest image is running.
 
 Loom is packaged as a [Docker](https://docker.com) image. It can be started with a `docker run ...` command shown below. When Loom runs for the first time it will create some necessary core infrastructure on your AWS account during a bootstrap phase:
 
