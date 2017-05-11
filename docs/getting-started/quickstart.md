@@ -25,14 +25,14 @@ Depending on how you store your AWS credentials and config there are two common 
 **Preferred: Use AWS credentials and config in `$HOME/.aws` directory**
 
 ```bash
-docker pull datawire/loom:0.1.0
-docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:alpha
+docker pull datawire/loom:0.1.1
+docker run -p 7000:7000 -v ${HOME}/.aws:/root/.aws --rm -it datawire/loom:0.1.1
 ```
 
 **Alternative: Set AWS environment variables**
 
 ```bash
-docker pull datawire/loom:0.1.0
+docker pull datawire/loom:0.1.1
 docker run --rm -it \
   -p 7000:7000 \
   -e AWS_ACCESS_KEY_ID=<Your-AWS-API-Access-Key> \
