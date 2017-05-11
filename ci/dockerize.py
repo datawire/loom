@@ -112,7 +112,7 @@ def main(args):
 
         docker('build {0} --build-arg IMPL_VERSION={1} .'.format(tags, version))
 
-    if args['--push']:
+    if not is_pull_request and args['--push']:
         docker('push {}'.format(docker_repo))
     else:
         print("==> Skipping Docker image push")
