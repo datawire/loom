@@ -5,8 +5,6 @@ import io.datawire.loom.proto.aws.symlinkAwsConfig
 import io.datawire.loom.proto.core.ExternalTool
 import io.datawire.loom.proto.data.AwsS3Dao
 import io.datawire.loom.proto.exception.*
-import io.datawire.loom.proto.fabric.kops.KopsTool
-import io.datawire.loom.proto.fabric.kops.KopsToolContext
 import io.datawire.loom.proto.fabric.terraform.*
 import io.datawire.loom.proto.model.*
 import java.nio.file.Files
@@ -68,7 +66,7 @@ class FabricManager(private val terraform     : ExternalTool,
         ))
 
         val networking = generateNetworkingModule(model.networking.module, mapOf(
-                "cidr_block"       to "10.0.0.0/16",
+                "cidr_block"       to fabric.networkCidr,
                 "name"             to fabric.name
         ))
 

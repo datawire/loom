@@ -88,7 +88,7 @@ def main(args):
     version = gradle('--quiet version')
     is_tag = os.getenv('TRAVIS_TAG') not in ['', None]
     is_pull_request = os.getenv('TRAVIS_PULL_REQUEST', 'false') != 'false'
-    pull_request_number = os.getenv('TRAVIS_PULL_REQUEST_NUMBER')
+    pull_request_number = os.getenv('TRAVIS_PULL_REQUEST')
     build_number = os.getenv('TRAVIS_BUILD_NUMBER')
 
     if is_pull_request:
@@ -112,7 +112,7 @@ def main(args):
 
         docker('build {0} --build-arg IMPL_VERSION={1} .'.format(tags, version))
 
-    if args['--push']:
+    if not is_pull_request and args['--push']:
         docker('push {}'.format(docker_repo))
     else:
         print("==> Skipping Docker image push")

@@ -23,7 +23,7 @@ data class FabricModel(
         val domain: String,
 
         @JsonProperty("networking")
-        val networking: FabricNetworkingModel = FabricNetworkingModel("github.com/datawire/loom//src/terraform/network-v2"),
+        val networking: FabricNetworkingModel = FabricNetworkingModel("github.com/datawire/loom//src/terraform/network-nosub"),
 
         @JsonProperty("masterType")
         val masterType: String = "t2.small",
