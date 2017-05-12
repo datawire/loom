@@ -1,6 +1,8 @@
 package io.datawire.loom.core
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -25,4 +27,10 @@ object Json {
   fun writer(view: KClass<*>): ObjectWriter {
     return mapper.writerWithView(view.java)
   }
+
+  fun reader(): ObjectReader = mapper.reader()
+
+  inline fun <reified T: Any> deserialize(text: String): T = reader().readValue<T>(text)
+
+  fun deserialize(text: String): JsonNode = reader().readTree(text)
 }

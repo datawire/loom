@@ -8,7 +8,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 
-abstract class ExternalTool(private val executableFile: Path) {
+abstract class ExternalTool(protected val executableFile: Path) {
 
   protected val log: Logger = LoggerFactory.getLogger(javaClass)
 

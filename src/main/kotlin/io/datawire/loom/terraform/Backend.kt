@@ -2,6 +2,7 @@ package io.datawire.loom.terraform
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonView
+import java.nio.file.Path
 
 
 data class Backend(
@@ -21,4 +22,9 @@ fun createS3Backend(region: String, bucket: String, key: String, encrypt: Boolea
         "bucket"  to bucket,
         "key"     to key
     )
+)
+
+fun createLocalBackend(path: Path? = null) = Backend(
+    name = "local",
+    properties = path?.let { mapOf("path" to it.toString()) } ?: emptyMap()
 )
