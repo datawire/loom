@@ -79,6 +79,7 @@ dependencies {
 
   testCompile group: 'org.assertj', name: 'assertj-core', version: '3.6.2'
   testCompile group: 'junit',       name: 'junit',        version: junitVersion
+  testCompile 'com.natpryce:hamkrest:1.4.0.0'
 }
 
 tasks.withType(Tar) {
@@ -100,8 +101,23 @@ kotlin {
 }
 
 compileKotlin {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+
   kotlinOptions {
-    jvmTarget = '1.8'
+    jvmTarget = "1.8"
+    apiVersion = "1.1"
+    languageVersion = "1.1"
+  }
+}
+compileTestKotlin {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+
+  kotlinOptions {
+    jvmTarget = "1.8"
+    apiVersion = "1.1"
+    languageVersion = "1.1"
   }
 }
 
