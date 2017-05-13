@@ -3,6 +3,7 @@ package io.datawire.loom.terraform
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.datawire.loom.core.Json
+import io.datawire.loom.terraform.jackson.TerraformValueDeserializer
 import org.junit.Test
 import org.assertj.core.api.Assertions.*
 

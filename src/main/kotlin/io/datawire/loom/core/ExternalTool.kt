@@ -1,7 +1,5 @@
 package io.datawire.loom.core
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream
 import java.nio.file.Files
@@ -9,8 +7,6 @@ import java.nio.file.Path
 
 
 abstract class ExternalTool(protected val executableFile: Path) {
-
-  protected val log: Logger = LoggerFactory.getLogger(javaClass)
 
   init {
     if (!Files.isExecutable(executableFile)) {
@@ -36,3 +32,9 @@ abstract class ExternalTool(protected val executableFile: Path) {
     return ProcessResult(res.exitValue, if (res.hasOutput()) res.outputUTF8() else null)
   }
 }
+
+fun resolveExecutable(name: String, searchPaths: Set<Path>) =
+    searchPaths
+        .map  { it.resolve(name) }
+        .find { Files.isExecutable(it) }
+        ?: throw IllegalStateException("External tool '$name' not found or not on any of the search paths.")

@@ -1,15 +1,10 @@
 package io.datawire.loom.terraform
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import io.datawire.loom.terraform.jackson.TerraformValueDeserializer
+import io.datawire.loom.terraform.jackson.TerraformValueSerializer
 
 
 @JsonDeserialize(using = TerraformValueDeserializer::class)
@@ -26,37 +21,6 @@ data class TerraformList(override val value: List<String>): TerraformValue<List<
 }
 
 data class TerraformMap(override val value: Map<String, String>) : TerraformValue<Map<String, String>>()
-
-class TerraformValueSerializer : StdSerializer<TerraformValue<*>>(TerraformValue::class.java) {
-  override fun serialize(tfValue: TerraformValue<*>, gen: JsonGenerator, provider: SerializerProvider) {
-    when (tfValue) {
-      is TerraformString -> gen.writeString(tfValue.value)
-      is TerraformMap    -> gen.writeObject(tfValue.value)
-      is TerraformList   -> {
-        gen.writeStartArray()
-        tfValue.value.forEach { gen.writeString(it) }
-        gen.writeEndArray()
-      }
-    }
-  }
-}
-
-class TerraformValueDeserializer : StdDeserializer<TerraformValue<*>>(TerraformValue::class.java) {
-
-  override fun deserialize(parser: JsonParser, ctx: DeserializationContext): TerraformValue<*> {
-    val node = parser.codec.readTree<JsonNode>(parser)
-    return jsonNodeToTerraformValue(node) ?: throw JsonMappingException(parser, "Invalid Type")
-  }
-
-  private fun jsonNodeToMap(node: JsonNode): Map<String, String> {
-    val result = mutableMapOf<String, String>()
-    for ((k, v) in node.fields()) {
-      result.put(k, v.textValue())
-    }
-
-    return result
-  }
-}
 
 fun jsonNodeToTerraformValue(node: JsonNode): TerraformValue<*>? {
   return when {

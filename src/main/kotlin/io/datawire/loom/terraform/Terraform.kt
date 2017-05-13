@@ -2,7 +2,9 @@ package io.datawire.loom.terraform
 
 import io.datawire.loom.core.ExternalTool
 import io.datawire.loom.core.Json
+import io.datawire.loom.core.resolveExecutable
 import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class Terraform(
@@ -12,6 +14,21 @@ class Terraform(
 ) : ExternalTool(executable) {
 
   private val env = mapOf("HOME" to home.toString())
+
+  companion object {
+
+    private val terraformExecutable = resolveExecutable(
+        name = "terraform",
+        searchPaths = setOf(
+            "/bin",
+            "/usr/local/bin",
+            "/usr/bin",
+            "${System.getProperty("user.home")}/bin"
+        ).map { Paths.get(it) }.toSet()
+    )
+
+    fun newTerraform(home: Path, workspace: TerraformWorkspace) = Terraform(terraformExecutable, home, workspace)
+  }
 
   fun init() {
     val cmd = terraform("init", "-no-color", "-backend=true", "-get")
@@ -56,7 +73,7 @@ class Terraform(
     } else if (result.exitCode == 1 && template?.outputs?.isEmpty() ?: true) {
       Outputs()
     } else {
-      throw RuntimeException("Terraform output failed (workspace: ${workspace.path})")
+      throw RuntimeException("Retrieving terraform output failed (workspace: ${workspace.path})")
     }
   }
 
@@ -66,6 +83,11 @@ class Terraform(
       0    -> true
       else -> false
     }
+  }
+
+  fun version(): String {
+    val result = execute(terraform("version"), workspace.path, env)
+    return result.output?.substringAfter("Terraform v")?.substringBefore('\n') ?: throw RuntimeException("")
   }
 
   private fun terraform(args: List<String>) = listOf(executableFile.toString()) + args

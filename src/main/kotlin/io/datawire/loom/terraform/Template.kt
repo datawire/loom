@@ -24,7 +24,7 @@ data class Template(
 
     @JsonProperty("output")
     @JsonDeserialize(contentUsing = OutputDeserializer::class)
-    val outputs: Map<String, Output> = emptyMap()
+    val outputs: Map<String, OutputReference> = emptyMap()
 ) {
 
   fun render(output: Path) = Json.toJsonUsingView<TemplateView>(this, output)
@@ -36,7 +36,7 @@ fun terraformTemplate(
     terraform: TerraformBlock? = null,
     providers: List<Provider> = emptyList(),
     modules: List<Module> = emptyList(),
-    outputs: List<Output> = emptyList()
+    outputs: List<OutputReference> = emptyList()
 ) = Template(
     terraform,
     providers.associateBy { it.name },

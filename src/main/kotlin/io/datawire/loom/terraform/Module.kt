@@ -14,6 +14,4 @@ data class Module(
     @get:JsonAnyGetter
     @get:JsonView(TemplateView::class)
     val properties: Map<String, TerraformValue<*>> = emptyMap()
-) {
-
-}
+)

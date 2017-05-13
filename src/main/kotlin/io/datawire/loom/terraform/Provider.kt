@@ -11,8 +11,6 @@ data class Provider(
     @get:JsonView(TemplateView::class)
     @get:JsonAnyGetter
     val properties : Map<String, TerraformValue<*>>
-) {
-
-}
+)
 
 fun createAwsProvider(region: String) = Provider("aws", mapOf("region" to TerraformString(region)))
