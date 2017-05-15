@@ -87,7 +87,10 @@ class Terraform(
 
   fun version(): String {
     val result = execute(terraform("version"), workspace.path, env)
-    return result.output?.substringAfter("Terraform v")?.substringBefore('\n') ?: throw RuntimeException("")
+    return result.output
+        ?.substringAfter("Terraform v")
+        ?.substringBefore('\n')
+        ?: throw RuntimeException("Unable to retrieve version information from `$executableFile`.")
   }
 
   private fun terraform(args: List<String>) = listOf(executableFile.toString()) + args

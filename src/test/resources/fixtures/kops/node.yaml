@@ -1,0 +1,18 @@
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: 2017-05-15T08:14:35Z
+  labels:
+    kops.k8s.io/cluster: test.example.org
+  name: nodes
+spec:
+  associatePublicIp: true
+  image: kope.io/k8s-1.5-debian-jessie-amd64-hvm-ebs-2017-01-09
+  machineType: t2.small
+  maxSize: 3
+  minSize: 3
+  role: Node
+  subnets:
+  - us-east-1a
+  - us-east-1b
+  - us-east-1c

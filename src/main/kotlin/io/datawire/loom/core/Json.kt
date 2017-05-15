@@ -15,7 +15,9 @@ object Json {
 
   private val modules = listOf(KotlinModule(), Jdk8Module(), ParameterNamesModule(), JavaTimeModule())
 
-  val mapper: ObjectMapper by lazy { ObjectMapper().registerModules(modules) }
+  val mapper: ObjectMapper by lazy { newMapper() }
+
+  fun newMapper(): ObjectMapper = ObjectMapper().registerModules(modules)
 
   inline fun <reified T: Any> toJsonUsingView(any: Any?): String =
       writer(T::class).withDefaultPrettyPrinter().writeValueAsString(any)

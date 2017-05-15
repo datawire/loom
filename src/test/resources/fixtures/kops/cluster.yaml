@@ -1,0 +1,67 @@
+apiVersion: kops/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: 2017-05-15T08:14:35Z
+  name: test.example.org
+spec:
+  api:
+    dns: {}
+  authorization:
+    alwaysAllow: {}
+  channel: stable
+  cloudLabels:
+    Owner: DatawireDeveloper
+  cloudProvider: aws
+  configBase: s3://loom-state-ABCD12345678/test.example.org
+  dnsZone: example.org
+  etcdClusters:
+  - etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-us-east-1a
+      name: a
+    - encryptedVolume: true
+      instanceGroup: master-us-east-1b
+      name: b
+    - encryptedVolume: true
+      instanceGroup: master-us-east-1c
+      name: c
+    name: main
+  - etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: master-us-east-1a
+      name: a
+    - encryptedVolume: true
+      instanceGroup: master-us-east-1b
+      name: b
+    - encryptedVolume: true
+      instanceGroup: master-us-east-1c
+      name: c
+    name: events
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  kubernetesVersion: 1.5.4
+  masterPublicName: api.test.example.org
+  networkCIDR: 21.0.0.0/16
+  networking:
+    kubenet: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  subnets:
+  - cidr: 21.0.32.0/19
+    name: us-east-1a
+    type: Public
+    zone: us-east-1a
+  - cidr: 21.0.64.0/19
+    name: us-east-1b
+    type: Public
+    zone: us-east-1b
+  - cidr: 21.0.96.0/19
+    name: us-east-1c
+    type: Public
+    zone: us-east-1c
+  topology:
+    dns:
+      type: Public
+    masters: public
+    nodes: public
