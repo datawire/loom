@@ -109,14 +109,14 @@ class Loom(
     path("/api") {
       delete ("/fabrics",     acceptJson, Route(this::removeFabric))
       get    ("/fabrics/:id", acceptJson, Route(this::fetchFabric), jsonifier)
-      post   ("/fabrics",     acceptJson, Route(this::addFabric))
+      post   ("/fabrics",     acceptJson, Route(this::addFabric), jsonifier)
 
       post   ("/fabrics/:name/resources", acceptJson, Route(this::addResourceToFabric))
       delete ("/fabrics/:name/resources/:name", acceptJson, Route(this::removeResourceFromFabric))
 
       delete ("/models/:name", acceptJson, Route(this::decommissionModel), jsonifier)
       get    ("/models/:name", acceptJson, Route(this::fetchModel), jsonifier)
-      post   ("/models",       acceptJson, Route(this::createModel))
+      post   ("/models",       acceptJson, Route(this::createModel), jsonifier)
     }
 
     log.info("== Registered API endpoints (/api*)")
@@ -184,14 +184,14 @@ fun bootstrapLoom(config: LoomConfig): Loom {
       json = Json(),
       fabricModelDao = fabricModels,
       fabricSpecDao  = fabricSpecs,
-      fabricService  = TerraformAndKopsFabricService(fabricModels, fabricSpecs)
+      fabricService  = TerraformAndKopsFabricService(aws, fabricModels, fabricSpecs)
   )
 
   return loom
 }
 
 private fun initLoomWorkspace() {
-  Files.createDirectories(Paths.get(System.getProperty("user.home"), "loom"))
+  Files.createDirectories(Paths.get(System.getProperty("user.home"), "loom-workspace"))
 }
 
 private fun configureProperties() {

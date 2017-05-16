@@ -1,24 +1,30 @@
 package io.datawire.loom.fabric
 
+import io.datawire.loom.core.LoomException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
-class InMemoryFabricSpecDao : FabricSpecDao {
+
+class InMemoryFabricSpecDao(
+    private val map: ConcurrentMap<String, FabricSpec> = ConcurrentHashMap()
+) : FabricSpecDao {
+
   override fun createSpec(spec: FabricSpec) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun deleteSpec(id: String) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    val previous = map.putIfAbsent(spec.name, spec)
+    if (previous != null) {
+      throw LoomException(409)
+    }
   }
 
   override fun updateSpec(model: FabricSpec): FabricSpec {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    return map.put(model.name, model) ?: model
   }
 
-  override fun fetchSpec(name: String): FabricSpec? {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  override fun deleteSpec(id: String) {
+    map.remove(id)
   }
 
-  override fun exists(id: String): Boolean {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
+  override fun fetchSpec(name: String): FabricSpec? = map[name]
+
+  override fun exists(id: String): Boolean = id in map
 }

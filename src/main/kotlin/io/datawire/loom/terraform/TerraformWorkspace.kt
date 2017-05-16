@@ -46,11 +46,11 @@ class TerraformWorkspace(
     }
   }
 
-  fun fetchTemplate(): Template? {
+  fun fetchTemplate(): Template {
     return if (Files.isReadable(loomPath)) {
       json.mapper.readValue<Template>(loomPath.toFile())
     } else {
-      null
+      terraformTemplate()
     }
   }
 

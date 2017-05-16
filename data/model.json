@@ -1,0 +1,24 @@
+{
+  "name": "development",
+
+  "domain": "k736.net",
+  "masterNodes": {
+    "name": "master",
+    "type": "t2.small",
+    "count": 1,
+    "availabilityZones": ["us-east-1a", "us-east-1b", "us-east-1c"]
+  },
+  "resourcesNetwork": {
+    "module": "github.com/datawire/loom//terraform/network-data-v1?ref=plombardi/experimental"
+  },
+  "region": "us-east-1",
+  "sshPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDLQLAY38fuzH2BmDFffJ66lnYWs71BscuayqG5UjBOSnH8zayAN6QrbDMfTXKohYQabniEPaq+h/f1vSaXQ/NsRCwmwcTCAcEu4+ibIfqmycStrG9UaFpJP+Ra+fnF8MaLv2eLua+IYZ7jEbVm2QahRvoGSbvWxTRxB/5UBVztYep7TwPRzla99FefIxsu2qF2rh5WbyRgFg99TGW2mijRFkqMoy8SpZ/PYLqQBV8n64n8cJbMa6m1jIK/ZqU/n+yGh0SnK2aspdIY9hB3SsRyX8Mm/+YO8vCvpsjbK+h5f0l9H9rB2Mz2nDszI8w/P7kBeLYVN2uh1Og97q9b3uUoit3vLc96qxnfiaXo4YbKXwbUiTbj8sC7MrXzwSQsge/jlqkXpt4VDbZJrCnjjwAQMXYtnd3SeRKfAtYT3dkBPKIcmsLoLA/Fx9LI/3hHHHlGO5QjppEiaMb+7WcQ7uo7xYxH+2HR2Sn8UGX+AqHKxm5y2yxGybTSQ5H2uwkJmkhHfmzKpXOC/0QVpEPXMIoao8YYgYhE/94OtkNkb5h2myYypuQMWIBOe6K18BMh1B6GIMMV0vUxGSMeb+OJgvc54QFLDXePKj8xw/epUAJ45Wdclstr758BHNlAc3MQNQcUZXefcflYv6l/I/qOgCgwUZ+wf7+XAUSt6oCFqLLauw== insecure@datawire.io",
+  "workerNodes": [
+    {
+      "name": "nodes",
+      "type": "t2.small",
+      "count": 3,
+      "availabilityZones": ["us-east-1a", "us-east-1b", "us-east-1c"]
+    }
+  ]
+}

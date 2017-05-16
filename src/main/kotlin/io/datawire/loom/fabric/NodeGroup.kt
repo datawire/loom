@@ -1,7 +1,7 @@
 package io.datawire.loom.fabric
 
 
-sealed class NodeGroup(
+data class NodeGroup(
     val name              : String,
     val type              : String,
     val count             : Int,

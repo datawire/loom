@@ -35,24 +35,16 @@ class FabricModelValidator(private val aws: AwsCloud) : Validator() {
         field("/region"),
         nullable = false,
         type     = JsonNodeType.STRING,
-        check    = { aws.isUsableRegion(textValue()) },
+        check    = { !aws.isUsableRegion(textValue()) },
         failed   = issue("Invalid Cloud Region", "Cloud provider region is not valid or usable")
     )?.let { issues += it }
 
     root.validate(
-        field("/masterType"),
+        field("/masterNodes"),
         nullable = false,
-        type     = JsonNodeType.STRING,
-        check    = { aws.isUsableMasterType(textValue()) },
+        type     = JsonNodeType.OBJECT,
+        check    = { true },
         failed   = issue("Invalid Node Type", "Master node type is not valid or usable")
-    )?.let { issues += it }
-
-    root.validate(
-        field("/masterCount"),
-        nullable = true,
-        type     = JsonNodeType.NUMBER,
-        check    = { intValue() >= 0 },
-        failed   = issue("Value is Too Low", "Master node count is below allowed value: 0")
     )?.let { issues += it }
 
     root.validate(
@@ -64,9 +56,9 @@ class FabricModelValidator(private val aws: AwsCloud) : Validator() {
     )?.let { issues += it }
 
     root.validate(
-        field("/nodeGroups"),
+        field("/workerNodes"),
         nullable = false,
-        type     = JsonNodeType.OBJECT,
+        type     = JsonNodeType.ARRAY,
         check    = { true },
         failed   = issue("Value is Too Low", "Master node count is below allowed value: 0")
     )?.let { issues += it }

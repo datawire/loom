@@ -46,7 +46,7 @@ class FabricParametersValidator(
         field("/model"),
         nullable = false,
         type     = JsonNodeType.STRING,
-        check    = { fabricModelDao.notExists(textValue()) },
+        check    = { fabricModelDao.exists(textValue()) },
         failed   = issue("Model Does Not Exist", "Specified fabric model does not exist")
     )?.let { issues += it }
 

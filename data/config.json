@@ -1,0 +1,5 @@
+{
+  "name"        : "plombardi",
+  "model"       : "development",
+  "clusterCidr" : "33.0.0.0/16"
+}

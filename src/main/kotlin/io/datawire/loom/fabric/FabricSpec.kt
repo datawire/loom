@@ -11,18 +11,22 @@ data class FabricSpec(
     val model             : String,
     val masterNodes       : NodeGroup,
     val name              : String,
+    val region            : String,
     val resourcesNetwork  : ResourcesNetwork,
+    val sshPublicKey      : String,
     val workerNodes       : List<NodeGroup>
 )
 
 fun assembleFabricSpec(model: FabricModel, config: FabricConfig) = FabricSpec(
-    clusterCidr = config.clusterCidr,
-    clusterDomain = "${config.name}.${model.domain}",
+    clusterCidr       = config.clusterCidr,
+    clusterDomain     = "${config.name}.${model.domain}",
     clusterDomainZone = model.domain,
-    creationTime = Instant.now(),
-    model = model.name,
-    masterNodes = model.masterNodes,
-    name = config.name,
-    resourcesNetwork = model.resourcesNetwork,
-    workerNodes = model.workerNodes
+    creationTime      = Instant.now(),
+    model             = model.name,
+    masterNodes       = model.masterNodes,
+    name              = config.name,
+    region            = model.region,
+    resourcesNetwork  = model.resourcesNetwork,
+    sshPublicKey      = model.sshPublicKey,
+    workerNodes       = model.workerNodes
 )

@@ -2,7 +2,13 @@ package io.datawire.loom.kops
 
 import io.datawire.loom.core.ExternalTool
 import io.datawire.loom.core.Workspace
+import io.datawire.loom.core.Yaml
+import io.datawire.loom.core.resolveExecutable
+import io.datawire.loom.terraform.Terraform
+import io.datawire.loom.terraform.TerraformWorkspace
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class Kops(
@@ -13,20 +19,74 @@ class Kops(
 ) : ExternalTool(executable) {
 
   private val env = mapOf(
+      "PATH"             to System.getenv("PATH"),
       "HOME"             to home.toString(),
-      "KOPS_STATE_STORE" to stateStore
+      "KOPS_STATE_STORE" to "s3://$stateStore"
   )
 
-  fun exportConfig(name: String): String {
-    return ""
+  companion object {
+
+    private val kopsExecutable = resolveExecutable(
+        name = "kops",
+        searchPaths = setOf(
+            "/bin",
+            "/usr/local/bin",
+            "/usr/bin",
+            "${System.getProperty("user.home")}/bin"
+        ).map { Paths.get(it) }.toSet()
+    )
+
+    fun newKops(home: Path, stateStore: String, workspace: Workspace) = Kops(kopsExecutable, home, stateStore, workspace)
+  }
+
+  fun updateCluster(name: String) {
+    val cmd = kops("update", "cluster",
+        "--name=$name",
+        "--target=terraform",
+        "--out=${workspace.path.resolve("terraform/cluster")}")
+
+    val res = execute(cmd, workspace.path, env)
+    if (res.exitCode != 0) {
+      throw RuntimeException("Failed to create SSH public key")
+    }
   }
 
   /**
    * Registers cluster configuration with the Kops state store. Register *DOES NOT* create the actual cloud resources
    * that run the cluster.
    */
-  fun registerClusterConfig(config: CreateClusterConfig) {
+  fun createCluster(config: ClusterConfig) {
+    val path = workspace.path.resolve("${config.metadata.name}.yaml")
+    Yaml().write(config, path)
 
+    val cmd = kops("create", "-f", path.toString())
+    val res = execute(cmd, workspace.path, env)
+
+    if (res.exitCode != 0) {
+      throw RuntimeException("Failed to create Cluster Config")
+    }
+  }
+
+  fun createInstanceGroup(config: InstanceGroupConfig) {
+    val path = workspace.path.resolve("${config.metadata.name}.yaml")
+    Yaml().write(config, path)
+
+    val cmd = kops("create", "-f", path.toString())
+    val res = execute(cmd, workspace.path, env)
+
+    if (res.exitCode != 0) {
+      throw RuntimeException("Failed to create Cluster Instance Group ${config.metadata}")
+    }
+  }
+
+  fun createSshPublicKeySecret(name: String, key: String) {
+    val publicKey = Files.write(workspace.path.resolve("cluster.pubkey"), key.toByteArray())
+    val cmd = kops("create", "secret", "--name=$name", "sshpublickey", "admin", "-i", publicKey.toAbsolutePath().toString())
+    val res = execute(cmd, workspace.path, env)
+
+    if (res.exitCode != 0) {
+      throw RuntimeException("Failed to create SSH public key")
+    }
   }
 
   /**

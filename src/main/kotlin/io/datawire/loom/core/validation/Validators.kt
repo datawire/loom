@@ -18,6 +18,8 @@ fun JsonNode.validate(
   val node = at(field)
   if (!nullable && node.isNullOrAbsent()) {
     return buildNullIssue(field)
+  } else if (nullable && node.isNullOrAbsent()) {
+    return null
   }
 
   if (!node.isNullOrAbsent() && type != node.nodeType) {
