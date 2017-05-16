@@ -13,6 +13,7 @@ class Terraform(
     private val workspace: TerraformWorkspace
 ) : ExternalTool(executable) {
 
+  private val json = Json()
   private val env = mapOf("HOME" to home.toString())
 
   companion object {
@@ -69,7 +70,7 @@ class Terraform(
 
     val result = execute(cmd, workspace.path, env)
     return if (result.exitCode == 0) {
-      result.output?.let { Json.deserialize<Outputs>(it) } ?: Outputs()
+      result.output?.let { json.read<Outputs>(it) } ?: Outputs()
     } else if (result.exitCode == 1 && template?.outputs?.isEmpty() ?: true) {
       Outputs()
     } else {

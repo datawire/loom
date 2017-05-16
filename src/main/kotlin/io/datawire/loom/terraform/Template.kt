@@ -27,9 +27,9 @@ data class Template(
     val outputs: Map<String, OutputReference> = emptyMap()
 ) {
 
-  fun render(output: Path) = Json.toJsonUsingView<TemplateView>(this, output)
+  fun render(output: Path) = Json().writeUsingView<TemplateView>(this, output)
 
-  fun render() = Json.toJsonUsingView<TemplateView>(this)
+  fun render() = Json().writeUsingView<TemplateView>(this)
 }
 
 fun terraformTemplate(

@@ -20,5 +20,7 @@ class Yaml(val mapper: ObjectMapper = ObjectMapper(YAMLFactory())) {
 
   fun write(any: Any, outputFile: Path) = mapper.writeValue(outputFile.toFile(), any)
 
-  inline fun <reified T: Any> read(text: String): T = mapper.readValue<T>(text)
+  inline fun <reified T: Any> read(text: String): T = mapper.readValue(text)
+
+  inline fun <reified T: Any> read(path: Path): T = mapper.readValue(path.toFile())
 }

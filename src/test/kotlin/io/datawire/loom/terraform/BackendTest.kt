@@ -9,6 +9,8 @@ import io.datawire.loom.core.Json
 
 class BackendTest {
 
+  private val json = Json()
+
   private val region = "us-east-2"
   private val bucket = "loom-terraform"
   private val key    = "terraform-state"
@@ -38,10 +40,10 @@ class BackendTest {
   @Test
   fun createS3Backend_renderWithTemplateView_returnsJustPropertiesAndNotName() {
     val backend = createS3Backend(region, bucket, key)
-    val json = Json.toJsonUsingView<TemplateView>(backend)
+    val json = json.writeUsingView<TemplateView>(backend)
 
     // read it back into a JsonNode which we can then inspect programmatically
-    val jsonNode = Json.mapper.readTree(json)
+    val jsonNode = this.json.toJsonNode(json)
     for (field in listOf("region", "bucket", "key", "encrypt")) {
       assert.that(jsonNode.has(field), equalTo(true))
     }

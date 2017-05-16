@@ -7,7 +7,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 
-class TerraformWorkspace(path: Path) : Workspace(path) {
+class TerraformWorkspace(
+    path: Path,
+    private val json: Json = Json()
+) : Workspace(path) {
 
   private val providerPath = path.resolve("override.tf.json")
   private val backendPath  = path.resolve("backend.tf.json")
@@ -29,7 +32,7 @@ class TerraformWorkspace(path: Path) : Workspace(path) {
 
   fun fetchProvider(): Provider? {
     return if (Files.isReadable(providerPath)) {
-      Json.mapper.readValue<Template>(providerPath.toFile()).providers["aws"]
+      json.mapper.readValue<Template>(providerPath.toFile()).providers["aws"]
     } else {
       null
     }
@@ -37,7 +40,7 @@ class TerraformWorkspace(path: Path) : Workspace(path) {
 
   fun fetchBackend(): Backend? {
     return if (Files.isReadable(backendPath)) {
-      Json.mapper.readValue<Template>(backendPath.toFile()).terraform!!.backend["s3"]
+      json.mapper.readValue<Template>(backendPath.toFile()).terraform!!.backend["s3"]
     } else {
       null
     }
@@ -45,7 +48,7 @@ class TerraformWorkspace(path: Path) : Workspace(path) {
 
   fun fetchTemplate(): Template? {
     return if (Files.isReadable(loomPath)) {
-      Json.mapper.readValue<Template>(loomPath.toFile())
+      json.mapper.readValue<Template>(loomPath.toFile())
     } else {
       null
     }

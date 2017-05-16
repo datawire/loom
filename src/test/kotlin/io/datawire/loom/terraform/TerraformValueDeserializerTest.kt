@@ -1,7 +1,6 @@
 package io.datawire.loom.terraform
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.datawire.loom.core.Json
 import io.datawire.loom.terraform.jackson.TerraformValueDeserializer
 import org.junit.Test
@@ -37,7 +36,7 @@ class TerraformValueDeserializerTest {
     }"""
 
     // verify the types are correct
-    val deserialized = Json.mapper.readValue<TestContainer>(json)
+    val deserialized = Json().read<TestContainer>(json)
     assertThat(deserialized.stringValue).isInstanceOf(TerraformString::class.java)
     assertThat(deserialized.numberValue).isInstanceOf(TerraformString::class.java)
     assertThat(deserialized.listValue).isInstanceOf(TerraformList::class.java)

@@ -18,7 +18,7 @@ class OutputsTest {
     }
 }"""
 
-    val outputs = Json.deserialize<Outputs>(json)
+    val outputs = Json().read<Outputs>(json)
 
     assertThat(outputs.size).isEqualTo(1)
 
