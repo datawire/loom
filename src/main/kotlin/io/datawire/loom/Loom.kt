@@ -55,7 +55,10 @@ class Loom(
   // Fabrics
   // -------------------------------------------------------------------------------------------------------------------
 
-  private fun removeFabric(req: Request, res: Response) { }
+  private fun removeFabric(req: Request, res: Response) {
+    //val fabricName = req.params(":name")
+    //
+  }
 
   private fun addFabric(req: Request, res: Response): FabricSpec {
     val config = fromJson<FabricConfig>(req.body(), fabricParamsValidator)
@@ -65,16 +68,28 @@ class Loom(
     return spec
   }
 
-  private fun fetchFabric(req: Request, res: Response) {
-    TODO()
+  private fun fetchFabric(req: Request, res: Response) = fabricService.fetchFabric(req.params(":name"))
+
+  private fun fetchKubernetesContext(req: Request, res: Response): String? {
+    val fabricName = req.params(":name")
+    return fabricService.fetchKubernetesContext(fabricName)?.apply {
+      res.header("Content-Type", "application/yaml")
+    }
+  }
+
+  private fun registerResourceModel(req: Request, res: Response): ResourceModel? {
+    val model = fromJson<ResourceModel>(req.body())
+    res.header("Content-Type", "application/json")
+    return fabricService.registerResourceModel(model)
   }
 
   private fun addResourceToFabric(req: Request, res: Response) {
-    TODO()
+    val config = fromJson<ResourceConfig>(req.body())
+    fabricService.addResourceToFabric(req.params(":name"), config)
   }
 
   private fun removeResourceFromFabric(req: Request, res: Response) {
-
+    fabricService.removeResourceFromFabric(req.params(":name"), req.params(":resource_name"))
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -111,12 +126,16 @@ class Loom(
       get    ("/fabrics/:id", acceptJson, Route(this::fetchFabric), jsonifier)
       post   ("/fabrics",     acceptJson, Route(this::addFabric), jsonifier)
 
+      get    ("/fabrics/:name/cluster/config", "application/yaml", Route(this::fetchKubernetesContext))
+
       post   ("/fabrics/:name/resources", acceptJson, Route(this::addResourceToFabric))
-      delete ("/fabrics/:name/resources/:name", acceptJson, Route(this::removeResourceFromFabric))
+      delete ("/fabrics/:name/resources/:resource_name", acceptJson, Route(this::removeResourceFromFabric))
 
       delete ("/models/:name", acceptJson, Route(this::decommissionModel), jsonifier)
       get    ("/models/:name", acceptJson, Route(this::fetchModel), jsonifier)
       post   ("/models",       acceptJson, Route(this::createModel), jsonifier)
+
+      post   ("/resource-models", acceptJson, Route(this::registerResourceModel), jsonifier)
     }
 
     log.info("== Registered API endpoints (/api*)")
@@ -138,13 +157,17 @@ class Loom(
       }
     }
 
+    internalServerError { req, res ->
+      res.status(500)
+    }
+
     exception(LoomException::class.java) { ex, _, res ->
       log.error("Error handling request", ex)
 
       //val (httpStatus, errors) = loomException.getStatusCodeAndErrorDetails()
 
       res.apply {
-        status(ex.statusCode)
+        status(500)
         //header("Content-Type", "application/json")
         //body(toJson(errors))
       }
@@ -183,7 +206,7 @@ fun bootstrapLoom(config: LoomConfig): Loom {
       json = Json(),
       fabricModelDao = fabricModels,
       fabricSpecDao  = fabricSpecs,
-      fabricService  = TerraformAndKopsFabricService(aws, fabricModels, fabricSpecs)
+      fabricService  = TerraformAndKopsFabricService(aws, fabricModels, fabricSpecs, InMemoryResourceModelDao())
   )
 
   return loom

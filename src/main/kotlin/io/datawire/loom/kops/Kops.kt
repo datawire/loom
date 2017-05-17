@@ -13,7 +13,7 @@ import java.nio.file.Paths
 
 class Kops(
     executable: Path,
-    home: Path,
+    private val home: Path,
     stateStore: String,
     private val workspace: Workspace
 ) : ExternalTool(executable) {
@@ -86,6 +86,34 @@ class Kops(
 
     if (res.exitCode != 0) {
       throw RuntimeException("Failed to create SSH public key")
+    }
+  }
+
+  fun exportClusterContext(name: String): String? {
+    val contextConfig = home.resolve(".kube/config")
+
+    return when {
+      Files.isRegularFile(contextConfig) -> Files.newBufferedReader(contextConfig).readText()
+      else -> {
+        val cmd = kops("export", "kubecfg", "--name=$name")
+        val res = execute(cmd, home, env)
+        res.output
+      }
+    }
+  }
+
+  fun getCluster(name: String, detailed: Boolean = false): String? {
+    val cmd = kops("get", "cluster", "--name=$name", "--output=json")
+
+//    if (detailed) {
+//      cmd + "--full"
+//    }
+
+    exportClusterContext(name)
+    val res = execute(cmd, home, env)
+    return when(res.exitCode) {
+      0    -> res.output
+      else -> null
     }
   }
 

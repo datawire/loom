@@ -14,4 +14,10 @@ interface FabricService {
   fun decommissionModel(name: String): FabricModel?
   fun createOrGetWorkspace(name: String): Workspace
   fun addTask(task: FabricTask)
+  fun registerResourceModel(model: ResourceModel): ResourceModel
+
+  fun fetchKubernetesContext(name: String): String?
+
+  fun addResourceToFabric(name: String, config: ResourceConfig)
+  fun removeResourceFromFabric(name: String, resourceName: String)
 }

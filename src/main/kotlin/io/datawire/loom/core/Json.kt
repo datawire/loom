@@ -41,4 +41,5 @@ class Json(val mapper: ObjectMapper = ObjectMapper(JsonFactory())) {
   inline fun <reified T: Any> read(node: JsonNode): T = mapper.treeToValue(node)
 
   fun toJsonNode(text: String): JsonNode = mapper.readTree(text)
+
 }
