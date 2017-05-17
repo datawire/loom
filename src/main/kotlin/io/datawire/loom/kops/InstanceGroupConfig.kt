@@ -14,21 +14,21 @@ private fun FabricSpec.generateLabels() = mapOf("kops.k8s.io/cluster" to cluster
 internal fun FabricSpec.createWorkerInstanceGroupConfigs(): List<InstanceGroupConfig> {
   val creationTime = Instant.now()
 
-  return workerNodes.map { config ->
+  return workerNodes.map { (name, type, count, zones) ->
     val metadata = Metadata(
         creationTimestamp = creationTime,
-        name              = config.name,
+        name              = name,
         labels            = generateLabels()
     )
 
     val spec = InstanceGroupSpec(
         associatePublicIp = true,
         image             = "kope.io/k8s-1.5-debian-jessie-amd64-hvm-ebs-2017-01-09",
-        machineType       = config.type,
-        minSize           = config.count,
-        maxSize           = config.count,
+        machineType       = type,
+        minSize           = count,
+        maxSize           = count,
         role              = InstanceRole.NODE,
-        subnets           = config.availabilityZones.toList()
+        subnets           = zones.toList()
     )
 
     InstanceGroupConfig(metadata, spec)

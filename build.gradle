@@ -68,7 +68,7 @@ dependencies {
 
   compile group: 'io.fabric8', name: 'kubernetes-client', version: '2.1.2'
 
-  compile group: 'com.sparkjava', name: 'spark-core', version: '2.5.5'
+  compile group: 'com.sparkjava', name: 'spark-core', version: '2.6.0'
 
   compile group: 'org.apache.commons',   name: 'commons-lang3', version: '3.5'
   compile group: 'commons-net',          name: 'commons-net',   version: '3.6'

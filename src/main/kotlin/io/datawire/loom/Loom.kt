@@ -141,11 +141,10 @@ class Loom(
     exception(LoomException::class.java) { ex, _, res ->
       log.error("Error handling request", ex)
 
-      val loomException = (ex as? LoomException) ?: LoomException(statusCode = 500)
       //val (httpStatus, errors) = loomException.getStatusCodeAndErrorDetails()
 
       res.apply {
-        status(loomException.statusCode)
+        status(ex.statusCode)
         //header("Content-Type", "application/json")
         //body(toJson(errors))
       }
