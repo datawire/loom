@@ -11,16 +11,31 @@ import io.datawire.loom.terraform.jackson.TerraformValueSerializer
 @JsonSerialize(using = TerraformValueSerializer::class)
 sealed class TerraformValue<out T> {
   abstract val value: T
+
+  fun isMappable(type: TerraformType): Boolean = when {
+    this is TerraformString && type == TerraformType.STRING -> true
+    this is TerraformList   && type == TerraformType.LIST   -> true
+    this is TerraformMap    && type == TerraformType.MAP    -> true
+    else -> false
+  }
+
+  abstract fun getNullReplacement(): TerraformValue<*>
 }
 
-data class TerraformString(override val value: String): TerraformValue<String>()
+data class TerraformString(override val value: String): TerraformValue<String>() {
+  override fun getNullReplacement(): TerraformValue<*> = TerraformString("")
+}
 
 data class TerraformList(override val value: List<String>): TerraformValue<List<String>>() {
 
   constructor(vararg items: String): this(items.toList())
+
+  override fun getNullReplacement(): TerraformValue<*> = TerraformList(emptyList())
 }
 
-data class TerraformMap(override val value: Map<String, String>) : TerraformValue<Map<String, String>>()
+data class TerraformMap(override val value: Map<String, String>) : TerraformValue<Map<String, String>>() {
+  override fun getNullReplacement(): TerraformValue<*> = TerraformMap(emptyMap())
+}
 
 fun jsonNodeToTerraformValue(node: JsonNode): TerraformValue<*>? {
   return when {

@@ -103,9 +103,26 @@ class TerraformPlan(
     val planResult = tf.plan()
 
     when(planResult) {
-      is Difference -> { println("APPLY!") }
-      else ->          { println("DO NOT APPLY!") }
+      is Difference -> {
+        val apply = TerraformApply(spec, fabricService, planResult)
+        fabricService.addTask(apply)
+      }
+      else -> { }
     }
   }
 }
 
+class TerraformApply(
+    private val spec: FabricSpec,
+    private val fabricService: FabricService,
+    private val difference: Difference
+) : FabricTask {
+
+  override fun execute() {
+    val fabricWorkspace    = fabricService.createOrGetWorkspace(spec.name)
+    val terraformWorkspace = TerraformWorkspace(Files.createDirectories(fabricWorkspace.path.resolve("terraform")))
+
+    val tf = Terraform.newTerraform(fabricWorkspace.path, terraformWorkspace)
+    val result = tf.apply(difference)
+  }
+}

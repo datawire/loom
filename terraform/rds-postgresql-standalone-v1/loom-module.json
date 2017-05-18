@@ -1,6 +1,6 @@
 {
   "name"   : "rds-postgresql-standalone-v1",
-  "source" : "github.com/datawire/loom//terraform/rds-postgresql-standalone-v1",
+  "source" : "github.com/datawire/loom//terraform/rds-postgresql-standalone-v1?ref=plombardi%2fexperimental",
 
   "variables": {
     "vpc_id"  : {"type": "string", "required" : true},

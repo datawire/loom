@@ -32,6 +32,17 @@ class TerraformAndKopsFabricService(
       fetchModel(name)?.let { fabricModels.updateModel(it.copy(active = false)) }
 
   // -------------------------------------------------------------------------------------------------------------------
+  // Resource Model Operations
+  // -------------------------------------------------------------------------------------------------------------------
+
+  override fun registerResourceModel(model: ResourceModel): ResourceModel {
+    resourceModels.createModel(model)
+    return model
+  }
+
+  fun fetchResourceModel(name: String) = resourceModels.fetchModel(name)
+
+  // -------------------------------------------------------------------------------------------------------------------
   // Fabric Operations
   // -------------------------------------------------------------------------------------------------------------------
 
@@ -51,12 +62,14 @@ class TerraformAndKopsFabricService(
   }
 
   override fun addResourceToFabric(name: String, config: ResourceConfig) {
-
-  }
-
-  override fun registerResourceModel(model: ResourceModel): ResourceModel {
-    resourceModels.createModel(model)
-    return model
+    fetchFabric(name)
+        ?.let { fabric ->
+          fetchResourceModel(config.model)?.apply {
+            val spec = assemble(fabric, this, config)
+            val addRsrcTask = AddModuleToTerraform(spec.toTerraformModule(), fabric, this@TerraformAndKopsFabricService)
+            addTask(addRsrcTask)
+          }
+        }
   }
 
   override fun removeResourceFromFabric(name: String, resourceName: String) {

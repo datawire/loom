@@ -1,7 +1,9 @@
 package io.datawire.loom.fabric
 
+import io.datawire.loom.terraform.TerraformType
+
 
 class VariableModel(
-    val type     : String,
+    val type     : TerraformType,
     val required : Boolean
 )
