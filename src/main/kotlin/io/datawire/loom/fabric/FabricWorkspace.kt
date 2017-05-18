@@ -1,9 +1,17 @@
 package io.datawire.loom.fabric
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.datawire.loom.core.Json
+import io.datawire.loom.terraform.Template
+import io.datawire.loom.terraform.terraformTemplate
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.nio.file.Files.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.lang.System.*
+import java.nio.file.Files
 
 /**
  * Interface for interacting with the filesystem where fabric configuration is manipulated and stored for processing.
@@ -13,9 +21,16 @@ import java.lang.System.*
  */
 class FabricWorkspace(val name: String, val home: Path) {
 
+  private val json = Json()
+
   val environment = mapOf<String, String>("HOME" to home.toAbsolutePath().toString())
 
   val terraform: Path = createDirectories(resolve("terraform"))
+
+  fun loadTerraformTemplate(): Template? =
+      try { json.read(terraform.resolve("loom.tf.json")) } catch (ioe: IOException) { null }
+
+  fun exists(path: String): Boolean = exists(this.home.resolve(path))
 
   fun resolve(path: String): Path = this.home.resolve(path)
 

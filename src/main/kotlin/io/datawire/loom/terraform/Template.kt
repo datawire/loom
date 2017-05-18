@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import io.datawire.loom.core.Json
+import io.datawire.loom.terraform.jackson.ModuleDeserializer
 import io.datawire.loom.terraform.jackson.OutputDeserializer
 import io.datawire.loom.terraform.jackson.ProviderDeserializer
 import java.nio.file.Path
@@ -30,6 +31,34 @@ data class Template(
   fun render(output: Path) = Json().writeUsingView<TemplateView>(this, output)
 
   fun render() = Json().writeUsingView<TemplateView>(this)
+
+  fun removeModule(moduleName: String) =
+      this.copy(
+        modules = modules - moduleName,
+        outputs = outputs.filterKeys { it.startsWith("${moduleName}_") }
+      )
+
+  fun addModule(module: Module) =
+      if (!isModuleNameTaken(module.name)) {
+        this.copy(
+            modules = modules + (module.name to module),
+            outputs = outputs.filterKeys { it.startsWith("${module.name}_") }
+        )
+      } else {
+        throw IllegalArgumentException("Module name '${module.name}' is already in use.")
+      }
+
+  private fun isModuleNameTaken(name: String) = name in modules
+
+  private fun isModuleInUseAsDependency(name: String): Boolean {
+    for (mod in modules.values) {
+      if (mod.isDependent(name)) {
+        return true
+      }
+    }
+
+    return false
+  }
 }
 
 fun terraformTemplate(
