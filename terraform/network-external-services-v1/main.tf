@@ -10,7 +10,7 @@ variable "name" {
   description = "VPC name (e.g. myvpc)"
 }
 
-variable "kubernetes_security_groups" {
+variable "node_security_groups" {
   type        = "list"
   description = "list of kubernetes cluster security groups to authorize into this VPC"
   default     = []
@@ -113,8 +113,8 @@ resource "aws_security_group_rule" "ingress_self_all" {
 
 resource "aws_security_group_rule" "ingress_kubernetes_nodes" {
   type              = "ingress"
-  count             = "${var.kubernetes_security_groups_count}"
-  security_group_id = "${element(var.kubernetes_security_groups, count.index)}"
+  count             = "${var.node_security_groups_count}"
+  security_group_id = "${element(var.node_security_groups_count, count.index)}"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
