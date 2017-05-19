@@ -16,7 +16,7 @@ variable "kubernetes_security_groups" {
   default     = []
 }
 
-variable "kubernetes_security_groups_count" {
+variable "node_security_groups_count" {
   description = "count of kubernetes cluster security groups to authorize into this VPC"
 }
 
@@ -153,5 +153,5 @@ output "availability_zones"         { value = ["${data.aws_availability_zones.av
 output "main_security_group"        { value = "${aws_security_group.main.id}" }
 output "external_route_table_id"    { value = "${aws_route_table.external.id}" }
 output "internal_route_table_ids"   { value = ["${aws_route_table.internal.*.id}"] }
-output "internal_route_table_count" { value = "${aws_route_table.internal.*.count}" }
+output "internal_route_table_count" { value = "${aws_route_table.internal.count}" }
 
