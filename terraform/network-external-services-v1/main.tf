@@ -112,12 +112,13 @@ resource "aws_security_group_rule" "ingress_self_all" {
 }
 
 resource "aws_security_group_rule" "ingress_kubernetes_nodes" {
-  type              = "ingress"
-  count             = "${var.node_security_groups_count}"
-  security_group_id = "${element(var.node_security_groups, count.index)}"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
+  type                     = "ingress"
+  count                    = "${var.node_security_groups_count}"
+  security_group_id        = "${aws_security_group.main.id}"
+  source_security_group_id = "${element(var.node_security_groups, count.index)}"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
 }
 
 resource "aws_security_group_rule" "egress_all" {
