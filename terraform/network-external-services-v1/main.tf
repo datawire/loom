@@ -148,4 +148,4 @@ output "internal_subnets"         { value = ["${aws_subnet.internal.*.id}"] }
 output "availability_zones"       { value = ["${data.aws_availability_zones.available.names}"] }
 output "main_security_group"      { value = "${aws_security_group.main.id}" }
 output "external_route_table_id"  { value = "${aws_route_table.external.id}" }
-output "internal_route_tables_id" { value = "[${aws_route_table.internal.*.id}]" }
+output "internal_route_tables_id" { value = ["${aws_route_table.internal.*.id}"] }

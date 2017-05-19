@@ -50,7 +50,7 @@ resource "aws_vpc_peering_connection" "main" {
 }
 
 resource "aws_route" "kubernetes-external_services" {
-  route_table_id            = "${data.aws_route_table.${kubernetes_vpc_route_table}.id}"
+  route_table_id            = "${var.kubernetes_vpc_route_table}"
   destination_cidr_block    = "${var.external_services_vpc_cidr}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.main.id}"
 }
@@ -62,7 +62,7 @@ resource "aws_route" "external_services_external-kubernetes" {
 }
 
 resource "aws_route" "external_services_internal-kubernetes" {
-  count                     = "${length(external_services_vpc_internal_route_tables)}"
+  count                     = "${length(var.external_services_vpc_internal_route_tables)}"
   route_table_id            = "${element(var.external_services_vpc_internal_route_tables, count.index)}"
   destination_cidr_block    = "${var.kubernetes_vpc}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.main.id}"
