@@ -16,6 +16,10 @@ variable "kubernetes_security_groups" {
   default     = []
 }
 
+variable "kubernetes_security_groups_count" {
+  description = "count of kubernetes cluster security groups to authorize into this VPC"
+}
+
 data "aws_availability_zones" "available" { }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -109,7 +113,7 @@ resource "aws_security_group_rule" "ingress_self_all" {
 
 resource "aws_security_group_rule" "ingress_kubernetes_nodes" {
   type              = "ingress"
-  count             = "${length(var.kubernetes_security_groups)}"
+  count             = "${var.kubernetes_security_groups_count}"
   security_group_id = "${element(var.kubernetes_security_groups, count.index)}"
   from_port         = 0
   to_port           = 0
@@ -141,11 +145,13 @@ resource "aws_route_table_association" "external" {
 // Outputs
 // ---------------------------------------------------------------------------------------------------------------------
 
-output "vpc_id"                   { value = "${aws_vpc.main.id}" }
-output "cidr_block"               { value = "${aws_vpc.main.cidr_block}" }
-output "external_subnets"         { value = ["${aws_subnet.external.*.id}"] }
-output "internal_subnets"         { value = ["${aws_subnet.internal.*.id}"] }
-output "availability_zones"       { value = ["${data.aws_availability_zones.available.names}"] }
-output "main_security_group"      { value = "${aws_security_group.main.id}" }
-output "external_route_table_id"  { value = "${aws_route_table.external.id}" }
-output "internal_route_tables_id" { value = ["${aws_route_table.internal.*.id}"] }
+output "vpc_id"                     { value = "${aws_vpc.main.id}" }
+output "cidr_block"                 { value = "${aws_vpc.main.cidr_block}" }
+output "external_subnets"           { value = ["${aws_subnet.external.*.id}"] }
+output "internal_subnets"           { value = ["${aws_subnet.internal.*.id}"] }
+output "availability_zones"         { value = ["${data.aws_availability_zones.available.names}"] }
+output "main_security_group"        { value = "${aws_security_group.main.id}" }
+output "external_route_table_id"    { value = "${aws_route_table.external.id}" }
+output "internal_route_table_ids"   { value = ["${aws_route_table.internal.*.id}"] }
+output "internal_route_table_count" { value = "${aws_route_table.internal.*.count}" }
+

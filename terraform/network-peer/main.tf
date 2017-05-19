@@ -19,6 +19,10 @@ variable "external_services_vpc_internal_route_tables" {
   description = "route table identifiers for the external services external (public) route table"
 }
 
+variable "external_services_vpc_internal_route_tables_count" {
+  description = "count of route table identifiers for the external services external (public) route table"
+}
+
 variable "kubernetes_vpc" {
   description = "VPC that contains the Kubernetes cluster nodes."
 }
@@ -62,7 +66,7 @@ resource "aws_route" "external_services_external-kubernetes" {
 }
 
 resource "aws_route" "external_services_internal-kubernetes" {
-  count                     = "${length(var.external_services_vpc_internal_route_tables)}"
+  count                     = "${var.external_services_vpc_internal_route_tables_count}"
   route_table_id            = "${element(var.external_services_vpc_internal_route_tables, count.index)}"
   destination_cidr_block    = "${var.kubernetes_vpc}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.main.id}"
