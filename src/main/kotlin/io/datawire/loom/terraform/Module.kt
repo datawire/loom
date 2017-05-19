@@ -13,11 +13,11 @@ data class Module(
 
     @get:JsonAnyGetter
     @get:JsonView(TemplateView::class)
-    val properties: Map<String, TerraformValue<*>> = emptyMap()
+    val variables: Map<String, TerraformValue<*>> = emptyMap()
 ) {
 
     fun isDependent(moduleName: String): Boolean {
-        for (value in properties.values) {
+        for (value in variables.values) {
             if (when(value) {
                 is TerraformString -> { value.value.contains("module.$name") }
                 is TerraformList   -> { value.value.any { it.contains("module.$name") } }
@@ -29,4 +29,12 @@ data class Module(
 
         return false
     }
+
+
+
+    fun outputRef(outputName: String) = "module.$name.$outputName"
+
+    fun outputString(name: String) = TerraformString("\${${outputRef(name)}}")
+
+    fun outputList(name: String) = TerraformList(TerraformString("\${${outputRef(name)}}").value)
 }

@@ -34,6 +34,8 @@ class Loom(
 
   private val log = LoggerFactory.getLogger(Loom::class.java)
 
+  private val fabsrv = io.datawire.loom.fabric.r2.FabricService(aws, fabricModelDao, fabricSpecDao)
+
   private val acceptJson = "application/json"
   private val jsonifier  = Jsonifier(json)
 
@@ -63,7 +65,7 @@ class Loom(
   private fun addFabric(req: Request, res: Response): FabricSpec {
     val config = fromJson<FabricConfig>(req.body(), fabricParamsValidator)
 
-    val spec = fabricService.createFabric(config)
+    val spec = fabsrv.createFabric(config)
     res.header("Content-Type", "application/json")
     return spec
   }
@@ -110,7 +112,7 @@ class Loom(
 
   private fun createModel(req: Request, res: Response): FabricModel {
     val model = fromJson<FabricModel>(req.body(), fabricModelValidator)
-    return fabricService.createModel(model)
+    return fabsrv.createModel(model)
   }
 
   // -------------------------------------------------------------------------------------------------------------------

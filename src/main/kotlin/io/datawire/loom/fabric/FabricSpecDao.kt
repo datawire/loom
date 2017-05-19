@@ -2,7 +2,7 @@ package io.datawire.loom.fabric
 
 
 interface FabricSpecDao {
-  fun createSpec(spec: FabricSpec)
+  fun createSpec(spec: FabricSpec): FabricSpec
   fun deleteSpec(id: String)
   fun updateSpec(model: FabricSpec): FabricSpec
   fun fetchSpec(name: String): FabricSpec?

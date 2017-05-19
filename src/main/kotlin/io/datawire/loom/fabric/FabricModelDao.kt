@@ -2,7 +2,7 @@ package io.datawire.loom.fabric
 
 
 interface FabricModelDao {
-  fun createModel(model: FabricModel)
+  fun createModel(model: FabricModel): FabricModel
   fun deleteModel(id: String)
   fun updateModel(model: FabricModel): FabricModel
   fun fetchModel(name: String): FabricModel?

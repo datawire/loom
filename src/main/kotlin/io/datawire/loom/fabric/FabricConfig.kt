@@ -6,7 +6,11 @@ data class FabricConfig(
     val model         : String,
     val name          : String,
     val resourcesCidr : String = io.datawire.loom.fabric.computeResourcesCidr(clusterCidr)
-)
+) {
+
+  fun normalize(): FabricConfig =
+      copy(name = name.toLowerCase())
+}
 
 private fun computeResourcesCidr(clusterCidr: String): String {
   val cidrInfo = org.apache.commons.net.util.SubnetUtils(clusterCidr).info

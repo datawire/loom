@@ -11,7 +11,7 @@ data class ResourceSpec(
     val parameters : Map<String, TerraformValue<*>>
 ) {
 
-  fun toTerraformModule() = Module(name = name, source = source, properties = parameters)
+  fun toTerraformModule() = Module(name = name, source = source, variables = parameters)
 }
 
 fun assemble(fabric: FabricSpec, model: ResourceModel, config: ResourceConfig): ResourceSpec {

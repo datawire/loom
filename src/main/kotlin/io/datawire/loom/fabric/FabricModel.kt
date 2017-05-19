@@ -8,7 +8,7 @@ data class FabricModel(
     val creationTime     : Instant?,
     val masterNodes      : NodeGroup,
     val name             : String,
-    val resourcesNetwork : ResourcesNetwork,
+    val externalServicesNetwork : ExternalServicesNetworkModel,
     val region           : String,
     val sshPublicKey     : String,
     val workerNodes      : List<NodeGroup>

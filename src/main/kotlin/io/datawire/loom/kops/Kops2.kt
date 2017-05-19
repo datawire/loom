@@ -1,26 +1,22 @@
 package io.datawire.loom.kops
 
 import io.datawire.loom.core.ExternalTool
-import io.datawire.loom.core.Workspace
 import io.datawire.loom.core.Yaml
 import io.datawire.loom.core.resolveExecutable
-import io.datawire.loom.terraform.Terraform
-import io.datawire.loom.terraform.TerraformWorkspace
+import io.datawire.loom.fabric.FabricWorkspace
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
 
-class Kops(
+class Kops2(
     executable: Path,
-    private val home: Path,
-    stateStore: String,
-    private val workspace: Workspace
+    private val workspace: FabricWorkspace,
+    private val stateStore: String
 ) : ExternalTool(executable) {
 
-  private val env = mapOf(
+  private val env = workspace.environment + mapOf(
       "PATH"             to System.getenv("PATH"),
-      "HOME"             to home.toString(),
       "KOPS_STATE_STORE" to "s3://$stateStore"
   )
 
@@ -36,16 +32,16 @@ class Kops(
         ).map { Paths.get(it) }.toSet()
     )
 
-    fun newKops(home: Path, stateStore: String, workspace: Workspace) = Kops(kopsExecutable, home, stateStore, workspace)
+    fun newKops(workspace: FabricWorkspace, stateStore: String) = Kops2(kopsExecutable, workspace, stateStore)
   }
 
   fun updateCluster(name: String) {
     val cmd = kops("update", "cluster",
         "--name=$name",
         "--target=terraform",
-        "--out=${workspace.path.resolve("terraform/cluster")}")
+        "--out=${workspace.resolve("terraform/kubernetes_$name")}")
 
-    val res = execute(cmd, workspace.path, env)
+    val res = execute(cmd, workspace.resolve("kops"), env)
     if (res.exitCode != 0) {
       throw RuntimeException("Failed to create SSH public key")
     }
@@ -56,11 +52,11 @@ class Kops(
    * that run the cluster.
    */
   fun createCluster(config: ClusterConfig) {
-    val path = workspace.path.resolve("${config.metadata.name}.yaml")
+    val path = workspace.resolve("kops").resolve("${config.metadata.name}.yaml")
     Yaml().write(config, path)
 
     val cmd = kops("create", "-f", path.toString())
-    val res = execute(cmd, workspace.path, env)
+    val res = execute(cmd, workspace.resolve("kops"), env)
 
     if (res.exitCode != 0) {
       throw RuntimeException("Failed to create Cluster Config")
@@ -68,11 +64,11 @@ class Kops(
   }
 
   fun createInstanceGroup(config: InstanceGroupConfig) {
-    val path = workspace.path.resolve("${config.metadata.name}.yaml")
+    val path = workspace.resolve("kops").resolve("${config.metadata.name}.yaml")
     Yaml().write(config, path)
 
     val cmd = kops("create", "-f", path.toString())
-    val res = execute(cmd, workspace.path, env)
+    val res = execute(cmd, workspace.resolve("kops"), env)
 
     if (res.exitCode != 0) {
       throw RuntimeException("Failed to create Cluster Instance Group ${config.metadata}")
@@ -80,9 +76,9 @@ class Kops(
   }
 
   fun createSshPublicKeySecret(name: String, key: String) {
-    val publicKey = Files.write(workspace.path.resolve("cluster.pubkey"), key.toByteArray())
+    val publicKey = Files.write(workspace.resolve("kops").resolve("cluster.pubkey"), key.toByteArray())
     val cmd = kops("create", "secret", "--name=$name", "sshpublickey", "admin", "-i", publicKey.toAbsolutePath().toString())
-    val res = execute(cmd, workspace.path, env)
+    val res = execute(cmd, workspace.resolve("kops"), env)
 
     if (res.exitCode != 0) {
       throw RuntimeException("Failed to create SSH public key")
@@ -90,32 +86,32 @@ class Kops(
   }
 
   fun exportClusterContext(name: String): String? {
-    val contextConfig = home.resolve(".kube/config")
+    val contextConfig = workspace.home.resolve(".kube/config")
 
     return when {
       Files.isRegularFile(contextConfig) -> Files.newBufferedReader(contextConfig).readText()
       else -> {
         val cmd = kops("export", "kubecfg", "--name=$name")
-        val res = execute(cmd, home, env)
+        val res = execute(cmd, workspace.resolve("kops"), env)
         res.output
       }
     }
   }
 
-  fun getCluster(name: String, detailed: Boolean = false): String? {
-    val cmd = kops("get", "cluster", "--name=$name", "--outputRef=json")
-
-//    if (detailed) {
-//      cmd + "--full"
+//  fun getCluster(name: String, detailed: Boolean = false): String? {
+//    val cmd = kops("get", "cluster", "--name=$name", "--outputRef=json")
+//
+////    if (detailed) {
+////      cmd + "--full"
+////    }
+//
+//    exportClusterContext(name)
+//    val res = execute(cmd, home, env)
+//    return when(res.exitCode) {
+//      0    -> res.output
+//      else -> null
 //    }
-
-    exportClusterContext(name)
-    val res = execute(cmd, home, env)
-    return when(res.exitCode) {
-      0    -> res.output
-      else -> null
-    }
-  }
+//  }
 
   /**
    * Unregister a cluster that is registered in the Kops state store. Unregister *DOES NOT* delete the actual cloud
@@ -125,7 +121,7 @@ class Kops(
    */
   fun unregisterCluster(name: String) {
     val cmd = kops("delete", "cluster", "--unregister", "--name=$name")
-    val res = execute(cmd, workspace.path, env)
+    val res = execute(cmd, workspace.resolve("kops"), env)
 
     if (res.exitCode != 0) {
       throw RuntimeException("")
@@ -133,7 +129,7 @@ class Kops(
   }
 
   fun version(): String {
-    val result = execute(kops("version"), workspace.path, env)
+    val result = execute(kops("version"), workspace.resolve("kops"), env)
 
     // version string = "Version X.Y.Z-$EXTRA_INFO (git-$COMMIT_HASH)"
     return result.output

@@ -71,10 +71,10 @@ class Terraform(
     val result = execute(cmd, workspace.path, env)
     return if (result.exitCode == 0) {
       result.output?.let { json.read<Outputs>(it) } ?: Outputs()
-    } else if (result.exitCode == 1 && template?.outputs?.isEmpty() ?: true) {
+    } else if (result.exitCode == 1 && template.outputs.isEmpty() ?: true) {
       Outputs()
     } else {
-      throw RuntimeException("Retrieving terraform output failed (workspace: ${workspace.path})")
+      throw RuntimeException("Retrieving terraform outputRef failed (workspace: ${workspace.path})")
     }
   }
 

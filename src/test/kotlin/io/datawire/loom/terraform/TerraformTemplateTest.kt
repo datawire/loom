@@ -35,12 +35,12 @@ class TerraformTemplateTest {
             Module(
                 name = "foo",
                 source = "/nonexistent/foo",
-                properties = mapOf("stringValue" to stringValue, "listValue" to listValue, "mapValue" to mapValue)
+                variables = mapOf("stringValue" to stringValue, "listValue" to listValue, "mapValue" to mapValue)
             ),
             Module(
                 name = "bar",
                 source = "/nonexistent/bar",
-                properties = mapOf("stringValue" to stringValue, "listValue" to listValue, "mapValue" to mapValue)
+                variables = mapOf("stringValue" to stringValue, "listValue" to listValue, "mapValue" to mapValue)
             )
         )
     )
