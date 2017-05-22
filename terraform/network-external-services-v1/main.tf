@@ -10,16 +10,6 @@ variable "name" {
   description = "VPC name (e.g. myvpc)"
 }
 
-variable "node_security_groups" {
-  type        = "list"
-  description = "list of kubernetes cluster security groups to authorize into this VPC"
-  default     = []
-}
-
-variable "node_security_groups_count" {
-  description = "count of kubernetes cluster security groups to authorize into this VPC"
-}
-
 data "aws_availability_zones" "available" { }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -111,16 +101,6 @@ resource "aws_security_group_rule" "ingress_self_all" {
   protocol          = "-1"
 }
 
-resource "aws_security_group_rule" "ingress_kubernetes_nodes" {
-  type                     = "ingress"
-  count                    = "${var.node_security_groups_count}"
-  security_group_id        = "${aws_security_group.main.id}"
-  source_security_group_id = "${element(var.node_security_groups, count.index)}"
-  from_port                = 0
-  to_port                  = 0
-  protocol                 = "-1"
-}
-
 resource "aws_security_group_rule" "egress_all" {
   type              = "egress"
   security_group_id = "${aws_security_group.main.id}"
@@ -155,4 +135,3 @@ output "main_security_group"        { value = "${aws_security_group.main.id}" }
 output "external_route_table_id"    { value = "${aws_route_table.external.id}" }
 output "internal_route_table_ids"   { value = ["${aws_route_table.internal.*.id}"] }
 output "internal_route_table_count" { value = "${aws_route_table.internal.count}" }
-
