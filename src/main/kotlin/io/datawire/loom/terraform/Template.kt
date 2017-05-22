@@ -7,6 +7,7 @@ import io.datawire.loom.core.Json
 import io.datawire.loom.terraform.jackson.ModuleDeserializer
 import io.datawire.loom.terraform.jackson.OutputDeserializer
 import io.datawire.loom.terraform.jackson.ProviderDeserializer
+import io.datawire.loom.terraform.jackson.ResourceBlockDeserializer
 import java.nio.file.Path
 
 
@@ -18,6 +19,9 @@ data class Template(
     @JsonProperty("provider")
     @JsonDeserialize(contentUsing = ProviderDeserializer::class)
     val providers: Map<String, Provider> = emptyMap(),
+
+    @JsonProperty("resource")
+    val resources: ResourceBlock?,
 
     @JsonProperty("module")
     @JsonDeserialize(contentUsing = ModuleDeserializer::class)
@@ -64,11 +68,14 @@ data class Template(
 fun terraformTemplate(
     terraform: TerraformBlock? = null,
     providers: List<Provider> = emptyList(),
+    resources: List<Resource> = emptyList(),
     modules: List<Module> = emptyList(),
     outputs: List<OutputReference> = emptyList()
 ) = Template(
     terraform,
     providers.associateBy { it.name },
+    create(resources),
     modules.associateBy { it.name },
     outputs.associateBy { it.name }
 )
+

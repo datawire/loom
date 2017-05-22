@@ -5,21 +5,81 @@ import io.datawire.loom.core.aws.AwsCloud
 import io.datawire.loom.fabric.*
 import io.datawire.loom.kops.*
 import io.datawire.loom.terraform.*
+import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
 
 class FabricService(
-    private val amazon  : AwsCloud,
-    private val models  : FabricModelDao,
-    private val fabrics : FabricSpecDao
+    private val amazon    : AwsCloud,
+    private val models    : FabricModelDao,
+    private val resources : InMemoryResourceModelDao,
+    private val fabrics   : FabricSpecDao
 ) {
+
+  private val log = LoggerFactory.getLogger(FabricService::class.java)
 
   private val tasks = Executors.newFixedThreadPool(4)
 
+  fun getFabric(name: String): FabricSpec? = fabrics.fetchSpec(name)
+
   fun getModel(name: String): FabricModel? = models.fetchModel(name)
 
-  fun createModel(model: FabricModel): FabricModel {
-    return synchronized(this) { models.createModel(model) }
+  fun createModel(model: FabricModel) = synchronized(this) { models.createModel(model) }
+
+  fun planThenApply(fabricName: String) {
+    synchronized(this) {
+      val workspace = getWorkspace(fabricName)
+      tasks.submit {
+        val terraform = Terraform.newTerraform(workspace)
+        val plan = terraform.plan()
+
+        when(plan) {
+          is Difference   -> terraform.apply(plan)
+          is NoDifference -> { log.info("Planning succeeded, but there were no differences to apply!") }
+          else            -> { log.error("Planning Failed") }
+        }
+      }
+    }
+  }
+
+  fun removeResourceFromFabric(fabricName: String, resourceName: String): FabricSpec {
+    return synchronized(this) {
+      fabrics.fetchSpec(fabricName)
+          ?.let { current ->
+            val updated = current.copy(resources = current.resources - resourceName)
+            if (current != updated) {
+              getWorkspace(updated.name).apply {
+                writeTerraformTemplate("main", generateTemplate(updated))
+              }
+
+              planThenApply(updated.name)
+              fabrics.updateSpec(updated)
+            } else {
+              current
+            }
+          }
+          ?: throw LoomException(404)
+    }
+  }
+
+  fun addResourceToFabric(fabricName: String, config: ResourceConfig): FabricSpec {
+    return synchronized(this) {
+      val fabricSpec = fabrics.fetchSpec(fabricName) ?: throw LoomException(404)
+
+      resources.fetchModel(config.model)
+          ?.let {
+            val resourceSpec  = assemble(fabricSpec, it, config)
+            val updatedFabric = fabricSpec.copy(resources = fabricSpec.resources + (resourceSpec.name to resourceSpec))
+
+            getWorkspace(updatedFabric.name).apply {
+              writeTerraformTemplate("main", generateTemplate(updatedFabric))
+            }
+
+            planThenApply(updatedFabric.name)
+            fabrics.updateSpec(updatedFabric)
+          }
+          ?: throw LoomException(404)
+    }
   }
 
   fun createFabric(config: FabricConfig): FabricSpec {
@@ -34,11 +94,17 @@ class FabricService(
 
       // All infrastructure management is driven through Terraform so we need to generate a lot of configuration files.
 
+      //
       // generate Terraform templates for the actual Fabric
-      val workspace = getWorkspace(spec.name)
-      workspace.writeTerraformTemplate("backend",  createS3BackendTemplate(spec.name))
-      workspace.writeTerraformTemplate("override", createAwsProviderTemplate(spec.region))
-      workspace.writeTerraformTemplate("main",     generateTemplate(spec))
+      //
+      // We're putting the provider block into 'override' because Terraform does not like when modules being consumed by
+      // a parent module declare additional provider provider blocks. The only way to fix this is to globally override.
+      //
+      val workspace = getWorkspace(spec.name).apply {
+        writeTerraformTemplate("backend",  createS3BackendTemplate(spec.name))
+        writeTerraformTemplate("override", createAwsProviderTemplate(spec.region))
+        writeTerraformTemplate("main",     generateTemplate(spec))
+      }
 
       // generate Kops configuration.
       val cluster = spec.toClusterConfig(amazon.stateStorageBucketName)
@@ -67,7 +133,7 @@ class FabricService(
                   value = "\${aws_vpc.${spec.clusterDomain.replace('.', '-')}.cidr_block}"),
 
               OutputReference(
-                  name  = "node_security_groups_count",
+                  name  = "node_security_group_count",
                   value = "\${aws_security_group.nodes-${spec.clusterDomain.replace('.', '-')}.count}"
               )
           )
@@ -80,6 +146,7 @@ class FabricService(
       )
 
       // schedule a task to plan and apply the work via Terraform.
+      planThenApply(spec.name)
 
       spec
     }
@@ -110,6 +177,10 @@ class FabricService(
     // It seems plausible that at some point in the future a Fabric will need to be able to support multiple Kubernetes
     // clusters. To make that transition easier we will generate modules named after the cluster DNS name which must be
     // unique.
+    //
+    // At a future date we will probably want global security group that wraps all kubernetes node clusters as well so
+    // that traffic into the external services network can be green-lit from all fabrics.
+    //
 
     val kubernetes = Module(
         name   = "kubernetes_${spec.clusterDomain.replace('.', '-')}",
@@ -118,20 +189,12 @@ class FabricService(
 
     val clusters = listOf(kubernetes)
 
-    val nodeSecurityGroups = if (clusters.size == 1) {
-      clusters[0].outputList("node_security_group_ids")
-    } else {
-      TerraformList("\${concat(${clusters.joinToString(separator = ", ") { it.outputRef("node_security_group_ids") } })")
-    }
-
     val externalServicesNetwork = Module(
         name      = "external_services_network",
         source    = spec.resourcesNetwork.module,
         variables = mapOf(
-            "name"                        to TerraformString("fabric-${spec.name}"),
-            "cidr_block"                  to TerraformString(spec.resourcesNetwork.cidr),
-            "node_security_groups"        to nodeSecurityGroups,
-            "node_security_groups_count"  to clusters[0].outputString("node_security_groups_count")
+            "name"        to TerraformString("fabric-${spec.name}"),
+            "cidr_block"  to TerraformString(spec.resourcesNetwork.cidr)
         )
     )
 
@@ -151,20 +214,70 @@ class FabricService(
         )
     )
 
+    val securityGroupsForClusterToExternalServicesAccess = clusters.map {
+      Resource(
+          type = "aws_security_group_rule",
+          name = "ingress_${it.name}-${externalServicesNetwork.name}",
+          properties = mapOf(
+              "type"                     to TerraformString("ingress"),
+              "count"                    to it.outputString("node_security_group_count"),
+              "security_group_id"        to externalServicesNetwork.outputString("main_security_group"),
+              "source_security_group_id" to TerraformString("\${element(${it.outputRef("node_security_group_ids")}, ${it.outputRef("node_security_group_count")})}"),
+              "from_port"                to TerraformString("0"),
+              "to_port"                  to TerraformString("0"),
+              "protocol"                 to TerraformString("-1"),
+              "depends_on"               to TerraformList(listOf("module.external_services_network-${it.name}"))
+          )
+      )
+    }
+
     val modules = listOf(
         kubernetes,
         externalServicesNetwork,
         clusterPeeredWithResourcesNetwork
-    ) + generateCustomModules()
+    ) + generateCustomModules(spec)
 
     return terraformTemplate(
-        modules = modules,
-        outputs = listOf(
+        resources = securityGroupsForClusterToExternalServicesAccess,
+        modules   = modules,
+        outputs   = listOf(
             OutputReference("${kubernetes.name}_vpc_id", kubernetes.outputString("vpc_id")),
             OutputReference("external_services_vpc_id", externalServicesNetwork.outputString("vpc_id"))
         )
     )
   }
 
-  private fun generateCustomModules(): List<Module> = emptyList()
+  private fun generateCustomModules(spec: FabricSpec): List<Module> {
+    return spec.resources.values.map { spec -> spec.toTerraformModule() }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -82,19 +82,18 @@ resource "aws_route_table" "internal" {
   }
 }
 
-resource "aws_security_group" "main" {
+resource "aws_default_security_group" "main" {
   vpc_id      = "${aws_vpc.main.id}"
-  name_prefix = "main-"
-  description = "main security group"
 
   tags {
+    Name = "${var.name}-main"
     Tier = "all"
   }
 }
 
 resource "aws_security_group_rule" "ingress_self_all" {
   type              = "ingress"
-  security_group_id = "${aws_security_group.main.id}"
+  security_group_id = "${aws_vpc.main.default_security_group_id}"
   self              = true
   from_port         = 0
   to_port           = 0
@@ -103,7 +102,7 @@ resource "aws_security_group_rule" "ingress_self_all" {
 
 resource "aws_security_group_rule" "egress_all" {
   type              = "egress"
-  security_group_id = "${aws_security_group.main.id}"
+  security_group_id = "${aws_vpc.main.default_security_group_id}"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
@@ -131,7 +130,7 @@ output "cidr_block"                 { value = "${aws_vpc.main.cidr_block}" }
 output "external_subnets"           { value = ["${aws_subnet.external.*.id}"] }
 output "internal_subnets"           { value = ["${aws_subnet.internal.*.id}"] }
 output "availability_zones"         { value = ["${data.aws_availability_zones.available.names}"] }
-output "main_security_group"        { value = "${aws_security_group.main.id}" }
+output "main_security_group"        { value = "${aws_default_security_group.main.id}" }
 output "external_route_table_id"    { value = "${aws_route_table.external.id}" }
 output "internal_route_table_ids"   { value = ["${aws_route_table.internal.*.id}"] }
 output "internal_route_table_count" { value = "${aws_route_table.internal.count}" }

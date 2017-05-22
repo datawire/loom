@@ -34,7 +34,7 @@ class Loom(
 
   private val log = LoggerFactory.getLogger(Loom::class.java)
 
-  private val fabsrv = io.datawire.loom.fabric.r2.FabricService(aws, fabricModelDao, fabricSpecDao)
+  private val fabsrv = io.datawire.loom.fabric.r2.FabricService(aws, fabricModelDao, InMemoryResourceModelDao(), fabricSpecDao)
 
   private val acceptJson = "application/json"
   private val jsonifier  = Jsonifier(json)
@@ -57,10 +57,7 @@ class Loom(
   // Fabrics
   // -------------------------------------------------------------------------------------------------------------------
 
-  private fun removeFabric(req: Request, res: Response) {
-    //val fabricName = req.params(":name")
-    //
-  }
+  private fun removeFabric(req: Request, res: Response) { }
 
   private fun addFabric(req: Request, res: Response): FabricSpec {
     val config = fromJson<FabricConfig>(req.body(), fabricParamsValidator)
@@ -70,7 +67,7 @@ class Loom(
     return spec
   }
 
-  private fun fetchFabric(req: Request, res: Response) = fabricService.fetchFabric(req.params(":name"))
+  private fun fetchFabric(req: Request, res: Response) = fabsrv.getFabric(req.params(":name"))
 
   private fun fetchKubernetesContext(req: Request, res: Response): String? {
     val fabricName = req.params(":name")
@@ -85,13 +82,15 @@ class Loom(
     return fabricService.registerResourceModel(model)
   }
 
-  private fun addResourceToFabric(req: Request, res: Response) {
+  private fun addResourceToFabric(req: Request, res: Response): FabricSpec {
     val config = fromJson<ResourceConfig>(req.body())
-    fabricService.addResourceToFabric(req.params(":name"), config)
+    res.header("Content-Type", "application/json")
+    return fabsrv.addResourceToFabric(req.params(":name"), config)
   }
 
-  private fun removeResourceFromFabric(req: Request, res: Response) {
-    fabricService.removeResourceFromFabric(req.params(":name"), req.params(":resource_name"))
+  private fun removeResourceFromFabric(req: Request, res: Response): FabricSpec {
+    res.header("Content-Type", "application/json")
+    return fabsrv.removeResourceFromFabric(req.params(":name"), req.params(":resource_name"))
   }
 
   // -------------------------------------------------------------------------------------------------------------------

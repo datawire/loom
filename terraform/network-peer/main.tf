@@ -16,7 +16,7 @@ variable "external_services_vpc_external_route_table" {
 
 variable "external_services_vpc_internal_route_tables" {
   type        = "list"
-  description = "route table identifiers for the external services external (public) route table"
+  description = "route table identifiers for the external services internal (public) route table"
 }
 
 variable "external_services_vpc_internal_route_tables_count" {
@@ -28,11 +28,11 @@ variable "kubernetes_vpc" {
 }
 
 variable "kubernetes_vpc_cidr" {
-  description = "VPC CIDR block for the external (non-kubernetes) services."
+  description = "VPC CIDR block for the Kubernetes cluster nodes."
 }
 
 variable "kubernetes_vpc_route_table" {
-  description = "route table identifier for the "
+  description = "route table identifier for the Kubernetes cluster."
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

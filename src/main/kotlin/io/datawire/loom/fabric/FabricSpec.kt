@@ -15,7 +15,7 @@ data class FabricSpec(
     val resourcesNetwork  : ExternalServicesNetworkSpec,
     val sshPublicKey      : String,
     val workerNodes       : List<NodeGroup>,
-    val resources         : List<ResourceConfig>
+    val resources         : Map<String, ResourceSpec>
 )
 
 fun assembleFabricSpec(model: FabricModel, config: FabricConfig) = FabricSpec(
@@ -30,5 +30,5 @@ fun assembleFabricSpec(model: FabricModel, config: FabricConfig) = FabricSpec(
     resourcesNetwork  = assemble(model.externalServicesNetwork, ExternalServicesNetworkConfig(config.resourcesCidr)),
     sshPublicKey      = model.sshPublicKey,
     workerNodes       = model.workerNodes,
-    resources         = emptyList()
+    resources         = emptyMap()
 )

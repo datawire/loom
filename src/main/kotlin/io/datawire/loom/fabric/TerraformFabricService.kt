@@ -1,6 +1,5 @@
 package io.datawire.loom.fabric
 
-import io.datawire.loom.core.LoomException
 import io.datawire.loom.core.Workspace
 import io.datawire.loom.core.aws.AwsCloud
 import io.datawire.loom.core.newWorkspace
@@ -49,27 +48,30 @@ class TerraformAndKopsFabricService(
   override fun fetchFabric(name: String) = fabricSpecs.fetchSpec(name)
 
   override fun createFabric(config: FabricConfig): FabricSpec {
-    val spec = fetchModel(config.model)
-        ?.run { assembleFabricSpec(this, config) }
-        ?: throw LoomException(404)
-
-    fabricSpecs.createSpec(spec)
-
-    val bootstrapTask = BootstrapFabric(spec, this)
-    addTask(bootstrapTask)
-
-    return spec
+    TODO("DEPRECATED; REMOVE")
+//    val spec = fetchModel(config.model)
+//        ?.run { assembleFabricSpec(this, config) }
+//        ?: throw LoomException(404)
+//
+//    fabricSpecs.createSpec(spec)
+//
+//    val bootstrapTask = BootstrapFabric(spec, this)
+//    addTask(bootstrapTask)
+//
+//    return spec
   }
 
   override fun addResourceToFabric(name: String, config: ResourceConfig) {
-    fetchFabric(name)
-        ?.let { fabric ->
-          fetchResourceModel(config.model)?.apply {
-            val spec = assemble(fabric, this, config)
-            val addRsrcTask = AddModuleToTerraform(spec.toTerraformModule(), fabric, this@TerraformAndKopsFabricService)
-            addTask(addRsrcTask)
-          }
-        }
+    TODO("DEPRECATED; REMOVE")
+
+//    fetchFabric(name)
+//        ?.let { fabric ->
+//          fetchResourceModel(config.model)?.apply {
+//            val spec = assemble(fabric, this, config)
+//            val addRsrcTask = AddModuleToTerraform(spec.toTerraformModule(), fabric, this@TerraformAndKopsFabricService)
+//            addTask(addRsrcTask)
+//          }
+//        }
   }
 
   override fun removeResourceFromFabric(name: String, resourceName: String) {
@@ -78,10 +80,6 @@ class TerraformAndKopsFabricService(
 
   override fun createOrGetWorkspace(name: String): Workspace {
     return newWorkspace(name)
-  }
-
-  override fun addTask(task: FabricTask) {
-    work.execute(task::execute)
   }
 
   // -------------------------------------------------------------------------------------------------------------------
