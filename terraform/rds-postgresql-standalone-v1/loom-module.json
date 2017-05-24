@@ -19,7 +19,7 @@
     "security_groups": {
       "type": "list",
       "required": true,
-      "value": ["${module.kubernetes.node_security_group_ids}"]
+      "value": ["${module.external_services_network.main_security_group}"]
     },
 
     "db_name" : {
