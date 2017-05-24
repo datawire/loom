@@ -3,7 +3,6 @@
   "model": "rds-postgresql-standalone-v1",
 
   "parameters": {
-    "vpc_id"  : "vpc-7ec42107",
-    "db_name" : "foo"
+    "db_name" : "plombardi-loomdev"
   }
 }

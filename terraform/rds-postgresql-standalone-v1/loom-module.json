@@ -3,7 +3,27 @@
   "source" : "github.com/datawire/loom//terraform/rds-postgresql-standalone-v1?ref=plombardi%2fexperimental",
 
   "variables": {
-    "vpc_id"  : {"type": "string", "required" : true},
-    "db_name" : {"type": "string", "required" : false}
+
+    "vpc_id": {
+      "type": "string",
+      "required": true,
+      "value": "${module.external_services_network.vpc_id}"
+    },
+
+    "subnets": {
+      "type": "list",
+      "required": true,
+      "value": ["${module.external_services_network.internal_subnets}"]
+    },
+
+    "security_groups": {
+      "type": "list",
+      "required": true,
+      "value": ["${module.kubernetes.node_security_group_ids}"]
+    },
+
+    "db_name" : {
+      "type": "string", "required" : false
+    }
   }
 }
